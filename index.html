@@ -1,0 +1,2815 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Para você</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    color-scheme: dark;
+    --noite: #17143a;
+    --noite-fundo: #0f0d2a;
+    --lavanda: #b9b3e8;
+    --ouro: #ffd98a;
+    --rosa: #f4a3b8;
+    --texto: #f3f0ff;
+    --texto-suave: #b5b0d6;
+    --serif: "Young Serif", Georgia, "Times New Roman", serif;
+    --sans: "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  *, *::before, *::after { box-sizing: inherit; }
+  html { height: 100%; scroll-padding-top: env(safe-area-inset-top, 0px); }
+  body {
+    height: 100%;
+    margin: 0;
+    background: radial-gradient(120% 90% at 50% 100%, var(--noite) 0%, var(--noite-fundo) 70%);
+    color: var(--texto);
+    font-family: var(--sans);
+    overflow: hidden;
+  }
+  button { font: inherit; color: inherit; cursor: pointer; }
+  :focus-visible { outline: 3px solid var(--rosa); outline-offset: 3px; }
+
+  .app { height: 100%; display: flex; flex-direction: column; }
+
+  /* ---------- Tela inicial ---------- */
+  .intro {
+    position: absolute; inset: 0; z-index: 30;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; padding: 32px 28px;
+    background: radial-gradient(120% 90% at 50% 100%, var(--noite) 0%, var(--noite-fundo) 70%);
+    transition: opacity .8s ease, visibility .8s;
+  }
+  .intro.saindo { opacity: 0; visibility: hidden; }
+  .intro h1 {
+    font-family: var(--serif); font-weight: 400;
+    font-size: clamp(2.2rem, 8vw, 3.6rem); line-height: 1.15;
+    margin: 0 0 16px; max-width: 14em;
+  }
+  .intro p { color: var(--texto-suave); font-size: 1.05rem; line-height: 1.6; max-width: 26em; margin: 0 0 36px; }
+  .btn-principal {
+    background: var(--ouro); color: #2a2050; border: 0; border-radius: 999px;
+    padding: 14px 34px; font-weight: 600; font-size: 1.05rem;
+  }
+  .btn-principal:hover { background: #ffe5a8; }
+
+  /* ---------- Cabeçalho ---------- */
+  header { padding: 22px 16px 0; text-align: center; }
+  header h2 { font-family: var(--serif); font-weight: 400; font-size: 1.25rem; margin: 0; }
+  header .dica { color: var(--texto-suave); font-size: .95rem; margin: 10px 0 0; }
+  .contadores { display: grid; gap: 4px; max-width: 340px; margin: 12px auto 0; }
+  .contador { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin: 0; font-variant-numeric: tabular-nums; }
+  .contador .rot { color: var(--texto-suave); font-size: .82rem; text-align: left; }
+  .contador b { font-family: var(--serif); font-weight: 400; font-size: .95rem; white-space: nowrap; }
+  #juntos b { color: var(--rosa); }
+  #noivos b { color: var(--lavanda); }
+  #faltam b { color: var(--ouro); }
+  .btn-hoje {
+    position: relative; margin: 12px 0 0; padding: 8px 20px;
+    background: transparent; border: 1px solid rgba(255,217,138,.55); border-radius: 999px;
+    color: var(--ouro); font-weight: 500; font-size: .95rem;
+  }
+  .btn-hoje:hover { background: rgba(255,217,138,.12); }
+  .btn-hoje.novo::after {
+    content: ""; position: absolute; top: -3px; right: -3px; width: 11px; height: 11px;
+    border-radius: 50%; background: var(--rosa); box-shadow: 0 0 0 0 rgba(244,163,184,.7);
+    animation: pulsar-rosa 2s ease-in-out infinite;
+  }
+  @keyframes pulsar-rosa {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(244,163,184,.6); }
+    50% { box-shadow: 0 0 0 8px rgba(244,163,184,0); }
+  }
+  .legenda { position: absolute; left: 0; right: 0; bottom: 10px; text-align: center; pointer-events: none; color: var(--texto-suave); font-size: .85rem; }
+  .legenda strong { display: block; font-family: var(--serif); font-weight: 400; font-size: 1rem; color: var(--lavanda); margin-bottom: 2px; }
+  .progresso { color: var(--texto-suave); font-size: .9rem; margin: 10px 0 0; }
+
+  /* ---------- Céu ---------- */
+  .ceu { position: relative; flex: 1; min-height: 0; margin: 8px 0 0; }
+  .fundo-estrelas { position: absolute; inset: 0; pointer-events: none; }
+  .fundo-estrelas i {
+    position: absolute; width: 2px; height: 2px; border-radius: 50%;
+    background: var(--lavanda); opacity: .55;
+  }
+  svg.linhas { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+  svg.linhas line {
+    stroke: var(--ouro); stroke-width: 1.5; stroke-linecap: round; opacity: .7;
+    vector-effect: non-scaling-stroke;
+    animation: aparecer 1.1s ease both;
+  }
+  @keyframes aparecer { from { opacity: 0; } to { opacity: .7; } }
+
+  .estrela {
+    position: absolute; width: 56px; height: 56px; margin: -28px 0 0 -28px;
+    background: none; border: 0; padding: 0; border-radius: 50%;
+    display: grid; place-items: center;
+  }
+  .estrela::before {
+    content: ""; width: 14px; height: 14px; border-radius: 50%;
+    background: var(--lavanda);
+    box-shadow: 0 0 0 0 rgba(185,179,232,.6);
+    animation: pulsar 2.6s ease-in-out infinite;
+    transition: background .4s, box-shadow .4s, transform .4s;
+  }
+  .estrela:hover::before { transform: scale(1.35); }
+  .estrela.aberta::before {
+    background: var(--ouro); animation: none; transform: scale(1.25);
+    box-shadow: 0 0 18px 6px rgba(255,217,138,.55);
+  }
+  @keyframes pulsar {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(185,179,232,.55); }
+    50% { box-shadow: 0 0 0 12px rgba(185,179,232,0); }
+  }
+
+  /* ---------- Cartão da mensagem ---------- */
+  .fundo-cartao {
+    position: fixed; inset: 0; z-index: 20;
+    display: flex; align-items: center; justify-content: center;
+    padding: 24px; background: rgba(10, 8, 30, .72);
+    opacity: 0; visibility: hidden; transition: opacity .35s ease, visibility .35s;
+  }
+  .fundo-cartao.visivel { opacity: 1; visibility: visible; }
+  .cartao {
+    width: 100%; max-width: 440px;
+    background: #211c4e; border: 1px solid rgba(185,179,232,.25);
+    border-radius: 20px; padding: 32px 28px 26px;
+    transform: translateY(14px) scale(.98); transition: transform .35s ease;
+  }
+  .fundo-cartao.visivel .cartao { transform: none; }
+  .cartao h3 { font-family: var(--serif); font-weight: 400; font-size: 1.5rem; margin: 0 0 14px; color: var(--ouro); }
+  .cartao p { font-family: var(--serif); font-size: 1.15rem; line-height: 1.65; margin: 0 0 26px; }
+  .cartao .fechar {
+    background: transparent; border: 1px solid rgba(185,179,232,.45); border-radius: 999px;
+    padding: 9px 22px; color: var(--texto);
+  }
+  .cartao .fechar:hover { background: rgba(185,179,232,.15); }
+
+  .opcoes { display: flex; flex-wrap: wrap; gap: 10px; margin: 0 0 22px; }
+  .opcoes[hidden] { display: none; }
+  .opcoes button {
+    flex: 1 1 140px; background: var(--ouro); color: #2a2050; border: 0;
+    border-radius: 999px; padding: 13px 20px; font-weight: 600; font-size: 1.05rem;
+  }
+  .opcoes button:nth-child(2) { background: var(--rosa); }
+  .opcoes button:hover { filter: brightness(1.08); }
+
+  /* ---------- Final ---------- */
+  .final {
+    position: fixed; inset: 0; z-index: 25;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; padding: 32px 28px;
+    background: rgba(15, 13, 42, .9);
+    opacity: 0; visibility: hidden; transition: opacity 1.2s ease, visibility 1.2s;
+  }
+  .final.visivel { opacity: 1; visibility: visible; }
+  .final h2 {
+    font-family: var(--serif); font-weight: 400;
+    font-size: clamp(2rem, 7vw, 3.2rem); line-height: 1.2; margin: 0 0 18px; max-width: 14em;
+  }
+  .final p { color: var(--texto-suave); font-size: 1.1rem; line-height: 1.6; max-width: 26em; margin: 0 0 8px; }
+  .final .assinatura { font-family: var(--serif); color: var(--rosa); font-size: 1.3rem; margin: 18px 0 30px; }
+  .final .voltar {
+    background: transparent; border: 1px solid rgba(185,179,232,.45); border-radius: 999px;
+    padding: 9px 22px;
+  }
+
+  /* ---------- Telas e navegação ---------- */
+  .vistas { flex: 1; min-height: 0; position: relative; display: flex; flex-direction: column; }
+  .vista { display: none; flex: 1; min-height: 0; flex-direction: column; position: relative; }
+  .vista.ativa { display: flex; }
+  .abas { display: flex; background: rgba(15,13,42,.95); border-top: 1px solid rgba(185,179,232,.22); }
+  .aba {
+    flex: 1; background: none; border: 0; border-top: 3px solid transparent; margin-top: -1px;
+    padding: 13px 6px; color: var(--texto-suave); font-weight: 500; font-size: .95rem;
+  }
+  .aba.ativa { color: var(--ouro); border-top-color: var(--ouro); }
+  .vista-cab { padding: 18px 16px 0; text-align: center; }
+  .vista-cab h2 { font-family: var(--serif); font-weight: 400; font-size: 1.25rem; margin: 0; }
+  .vista-cab .dica { color: var(--texto-suave); font-size: .95rem; margin: 8px 0 0; }
+
+  /* ---------- Rimks vs Zunks ---------- */
+  .jogo { --tam: min(92vw, 420px, calc((100dvh - 245px) / 1.3)); }
+  .placar { display: flex; justify-content: space-between; align-items: center; width: var(--tam); margin: 14px auto 8px; font-size: .95rem; color: var(--texto-suave); }
+  .placar b { font-family: var(--serif); font-weight: 400; font-size: 1.15rem; color: var(--texto); margin-left: 4px; font-variant-numeric: tabular-nums; }
+  .vidas { display: flex; gap: 4px; }
+  .vidas svg { width: 22px; height: 26px; transition: opacity .3s, filter .3s; }
+  .vidas .perdida svg { opacity: .25; filter: grayscale(1); }
+  .arena-caixa { position: relative; width: var(--tam); margin: 0 auto; }
+  .arena {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;
+    padding: 8px; border-radius: 22px;
+    background: radial-gradient(90% 70% at 50% 0%, #2a2560 0%, #1b1746 100%);
+    border: 1px solid rgba(185,179,232,.2);
+  }
+  .arena.tremer { animation: tremer .3s; }
+  @keyframes tremer { 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
+  .arena.flash::after {
+    content: ""; position: absolute; inset: 0; border-radius: 22px; pointer-events: none;
+    background: radial-gradient(circle, rgba(255,217,138,.75), rgba(255,217,138,0) 70%);
+    animation: sumir-flash .4s ease-out forwards;
+  }
+  @keyframes sumir-flash { to { opacity: 0; } }
+  .buraco {
+    position: relative; aspect-ratio: 1 / 1.3; padding: 0; border: 0; background: none;
+    touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+  }
+  .buraco .portal {
+    position: absolute; left: 6%; right: 6%; bottom: 4%; height: 26%; border-radius: 50%;
+    background: radial-gradient(ellipse at 50% 40%, #05041a 30%, #2b2a6b 100%);
+    box-shadow: 0 0 14px rgba(120,110,230,.45);
+  }
+  .buraco .cena { position: absolute; left: 0; right: 0; top: 0; bottom: 17%; overflow: hidden; }
+  .buraco .lip {
+    position: absolute; left: 6%; right: 6%; bottom: 4%; height: 26%; border-radius: 50%;
+    border-bottom: 3px solid #6f68d6; pointer-events: none;
+  }
+  .bicho {
+    position: absolute; left: 50%; bottom: 0; width: 74%;
+    transform: translate(-50%, 105%); transition: transform .16s ease-out, opacity .3s;
+    pointer-events: none;
+  }
+  .bicho svg { display: block; width: 100%; height: auto; overflow: visible; }
+  .bicho.sobe { transform: translate(-50%, 6%); }
+  .bicho.matmallo, .bicho.zeprikito { width: 88%; }
+  .bicho.zeprikito { filter: drop-shadow(0 0 10px rgba(255,217,138,.9)); }
+  .bicho.puf { transform: translate(-50%, -25%) scale(1.25) rotate(8deg); opacity: 0; transition: transform .3s, opacity .3s; }
+  .bicho.triste { filter: grayscale(.8) brightness(.8); }
+  .bicho.treme { transform: translate(-50%, 6%) rotate(-5deg); }
+  .barra { position: absolute; left: 12%; right: 12%; top: 2%; height: 8px; border-radius: 4px; background: rgba(0,0,0,.45); overflow: hidden; }
+  .barra i { display: block; height: 100%; width: 100%; background: var(--rosa); transition: width .12s; }
+  .flutua {
+    position: absolute; left: 50%; top: 30%; transform: translateX(-50%); z-index: 3;
+    font-family: var(--serif); font-size: 1.3rem; pointer-events: none; animation: flutuar .8s ease-out forwards;
+    text-shadow: 0 2px 6px rgba(0,0,0,.6);
+  }
+  .flutua.ok { color: var(--ouro); }
+  .flutua.erro { color: var(--rosa); }
+  @keyframes flutuar { from { opacity: 1; transform: translate(-50%, 0); } to { opacity: 0; transform: translate(-50%, -34px); } }
+  .aviso-jogo {
+    position: absolute; left: 50%; top: 10px; transform: translate(-50%, -8px); z-index: 4;
+    background: rgba(15,13,42,.92); border: 1px solid rgba(255,217,138,.6); color: var(--ouro);
+    border-radius: 999px; padding: 8px 18px; font-weight: 600; font-size: .95rem; white-space: nowrap;
+    opacity: 0; pointer-events: none; transition: opacity .25s, transform .25s;
+  }
+  .aviso-jogo.visivel { opacity: 1; transform: translate(-50%, 0); }
+  .jogo-tela {
+    position: absolute; inset: 44px 0 0 0; z-index: 10; overflow-y: auto;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 20px 20px 28px; text-align: center;
+    background: radial-gradient(120% 90% at 50% 100%, var(--noite) 0%, var(--noite-fundo) 70%);
+  }
+  .jogo-tela[hidden] { display: none; }
+  .jogo-tela h2 { font-family: var(--serif); font-weight: 400; font-size: 1.7rem; margin: 0 0 8px; }
+  .jogo-tela > p { color: var(--texto-suave); line-height: 1.5; max-width: 26em; margin: 0 0 16px; }
+  .elenco { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; max-width: 380px; margin: 0 0 20px; }
+  .elenco figure { margin: 0; background: rgba(185,179,232,.1); border-radius: 16px; padding: 10px 8px 12px; }
+  .elenco svg { width: 56px; height: 66px; display: block; margin: 0 auto 4px; overflow: visible; }
+  .elenco b { display: block; font-family: var(--serif); font-weight: 400; font-size: 1rem; }
+  .elenco span { display: block; color: var(--texto-suave); font-size: .82rem; line-height: 1.35; margin-top: 2px; }
+  .fim-pontos { font-family: var(--serif); font-size: 3.2rem; line-height: 1; color: var(--ouro); margin: 6px 0; }
+  .fim-rank { font-family: var(--serif); font-size: 1.3rem; margin: 0 0 4px; }
+  .fim-rec { color: var(--texto-suave); margin: 0 0 22px; }
+
+  /* ---------- Gatinhos ---------- */
+  .contagem { display: flex; justify-content: center; gap: 22px; margin: 6px 0 0; color: var(--texto-suave); font-size: .95rem; }
+  .contagem b { font-family: var(--serif); font-weight: 400; color: var(--rosa); font-size: 1.1rem; margin-left: 4px; font-variant-numeric: tabular-nums; }
+  .palco-caixa { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; padding: 10px 0; }
+  .palco {
+    position: relative; width: min(94vw, 460px); display: flex; align-items: flex-end; justify-content: center;
+    padding: 46px 6px 14px; border-radius: 26px; touch-action: none; user-select: none; -webkit-user-select: none;
+    background: radial-gradient(90% 60% at 50% 100%, #3a3378 0%, #211c4e 80%);
+    border: 1px solid rgba(185,179,232,.2);
+  }
+  .palco::after {
+    content: ""; position: absolute; left: 8%; right: 8%; bottom: 20px; height: 34px; border-radius: 50%;
+    background: rgba(10,8,30,.35); z-index: 0; pointer-events: none;
+  }
+  .gato-caixa { position: relative; flex: 1; max-width: 50%; z-index: 1; transition: transform .7s ease; }
+  .gato { display: block; cursor: pointer; transition: transform .15s; }
+  .gato svg { display: block; width: 100%; height: auto; overflow: visible; }
+  .gato.afaga { transform: scale(1.03, .97); }
+  .nome { display: block; text-align: center; margin-top: 4px; color: var(--texto-suave); font-size: .9rem; }
+  .laranja { --pelo: #f39a3d; --barriga: #ffdcaa; --iris: #7cc46f; --contorno: #c8701c; --bigode: #fff3e0; }
+  .preto { --pelo: #2c2a38; --barriga: #47445a; --iris: #f0d24a; --contorno: #7f79b0; --bigode: #d8d4ee; }
+  .gato .fechado, .gato .zzz-svg { display: none; }
+  .gato.feliz .aberto, .palco.dorme .gato .aberto { display: none; }
+  .gato.feliz .fechado, .palco.dorme .gato .fechado { display: block; }
+  .gato .blush { opacity: 0; transition: opacity .3s; }
+  .gato.feliz .blush { opacity: .55; }
+  .gato .boca, .gato .cabeca, .gato .rabo { transform-box: fill-box; transform-origin: center; }
+  .gato .cabeca { transition: transform .4s; }
+  .gato .rabo { transform-origin: 10% 90%; }
+  .gato.feliz .rabo { animation: rabo .7s ease-in-out infinite alternate; }
+  @keyframes rabo { from { transform: rotate(-8deg); } to { transform: rotate(10deg); } }
+  .gato.mastiga .boca { animation: mastigar .25s infinite; }
+  .gato.mastiga .cabeca { animation: balancar .5s infinite; }
+  @keyframes mastigar { 50% { transform: scaleY(1.8); } }
+  @keyframes balancar { 50% { transform: translateY(3px); } }
+  .gato.pula { animation: pular .5s ease-out; }
+  @keyframes pular { 40% { transform: translateY(-16px); } }
+  .palco.dorme .gato .cabeca { transform: translateY(12px) rotate(-5deg); }
+  .zzz { position: absolute; top: 4%; right: 8%; font-family: var(--serif); color: var(--lavanda); font-size: 1.3rem; display: none; animation: zzz 2.4s ease-in-out infinite; }
+  .palco.dorme .zzz { display: block; }
+  @keyframes zzz { 50% { transform: translateY(-8px); opacity: .5; } }
+  .palco.juntos .gato-caixa.a { transform: translateX(14%) rotate(3deg); }
+  .palco.juntos .gato-caixa.b { transform: translateX(-14%) rotate(-3deg); }
+  .balao {
+    position: absolute; left: 50%; top: -6px; transform: translateX(-50%); z-index: 5;
+    background: #f3f0ff; color: #2a2050; border-radius: 14px; padding: 5px 12px; font-weight: 600; font-size: .9rem;
+    white-space: nowrap; pointer-events: none; animation: balao 1.1s ease-out forwards;
+  }
+  @keyframes balao { 0% { opacity: 0; transform: translate(-50%, 6px); } 15% { opacity: 1; transform: translate(-50%, 0); } 80% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -8px); } }
+  .coracao { position: absolute; z-index: 6; color: var(--rosa); font-size: 1.4rem; pointer-events: none; animation: coracao 1s ease-out forwards; }
+  @keyframes coracao { from { opacity: 1; transform: translate(-50%, -50%) scale(.7); } to { opacity: 0; transform: translate(-50%, -90px) scale(1.2); } }
+  .petisco { position: absolute; z-index: 6; top: 0; pointer-events: none; }
+  .petisco svg { width: 40px; height: auto; display: block; }
+  .bolinha { position: absolute; left: 0; top: 0; z-index: 6; width: 38px; pointer-events: auto; cursor: grab; touch-action: none; will-change: transform; }
+  #vista-gatos { overflow-y: auto; }
+  .status-gatos { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: min(94vw, 460px); margin: 10px auto 0; }
+  .st-gato { background: rgba(33,28,78,.7); border: 1px solid rgba(185,179,232,.18); border-radius: 14px; padding: 8px 10px; display: grid; gap: 4px; }
+  .st-gato > b { font-family: var(--serif); font-weight: 400; font-size: .9rem; }
+  .st { display: grid; grid-template-columns: 52px 1fr; align-items: center; gap: 6px; font-size: .7rem; color: var(--texto-suave); }
+  .st i { display: block; height: 7px; border-radius: 9px; background: rgba(185,179,232,.18); overflow: hidden; }
+  .st i b { display: block; height: 100%; border-radius: 9px; transition: width .5s; }
+  .st i.baixo b { background: #ff7a8a !important; animation: piscar 1.2s ease-in-out infinite; }
+  @keyframes piscar { 50% { opacity: .45; } }
+  .gato.triste .cabeca { transform: translateY(6px) rotate(-3deg); }
+  .gato.triste .rabo { animation: none; }
+  .bolinha[hidden] { display: none; }
+  .ferramentas { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; padding: 6px 12px 14px; }
+  .ferr {
+    background: transparent; border: 1px solid rgba(185,179,232,.45); border-radius: 999px;
+    padding: 9px 16px; color: var(--texto); font-size: .95rem;
+  }
+  .ferr[aria-pressed="true"] { background: var(--ouro); border-color: var(--ouro); color: #2a2050; font-weight: 600; }
+  .ferr.toggle[aria-pressed="true"] { background: var(--rosa); border-color: var(--rosa); }
+
+  /* ---------- Fliperama ---------- */
+  .barra-topo { position: relative; display: flex; align-items: center; justify-content: center; height: 44px; flex: none; padding: 0 8px; width: 100%; align-self: stretch; }
+  .voltar { position: absolute; left: 4px; top: 4px; background: none; border: 0; color: var(--texto-suave); padding: 8px 12px; font-size: .95rem; border-radius: 999px; }
+  .voltar:hover { color: var(--texto); background: rgba(185,179,232,.12); }
+  .titulo-jogo { font-family: var(--serif); font-size: 1.05rem; }
+  .menu-jogos { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 16px; width: 100%; max-width: 460px; margin: 0 auto; }
+  .cartao-jogo {
+    background: rgba(185,179,232,.1); border: 1px solid rgba(185,179,232,.22); border-radius: 18px;
+    padding: 12px 10px 14px; text-align: center; color: var(--texto);
+  }
+  .cartao-jogo:hover { background: rgba(185,179,232,.2); }
+  .cartao-jogo .arte { height: 78px; display: flex; justify-content: center; align-items: flex-end; gap: 4px; margin-bottom: 8px; }
+  .cartao-jogo .arte svg { height: 100%; width: auto; overflow: visible; }
+  .cartao-jogo b { display: block; font-family: var(--serif); font-weight: 400; font-size: 1.02rem; }
+  .cartao-jogo .desc { display: block; color: var(--texto-suave); font-size: .82rem; line-height: 1.35; margin-top: 3px; }
+  .cartao-jogo .rec { display: block; color: var(--ouro); font-size: .85rem; margin-top: 7px; }
+
+  /* ---------- Corrida no Horto ---------- */
+  .corrida { --tam: min(94vw, 440px, calc((100dvh - 250px) * 0.857)); }
+  .canvas-caixa { width: var(--tam); margin: 0 auto; }
+  .canvas-caixa canvas { display: block; width: 100%; height: auto; aspect-ratio: 360 / 420; border-radius: 18px; border: 1px solid rgba(185,179,232,.25); touch-action: manipulation; background: #2a1a5e; }
+
+  /* ---------- Duelo ---------- */
+  .duelo { align-items: center; overflow-y: auto; }
+  .ringue { display: flex; align-items: flex-end; justify-content: center; gap: 8px; width: min(94vw, 440px); margin-top: 6px; }
+  .lutador { flex: 1; text-align: center; transition: transform .2s; }
+  .lutador svg.perso { width: min(34vw, 140px); height: auto; display: block; margin: 0 auto; overflow: visible; }
+  .lutador b { display: block; font-family: var(--serif); font-weight: 400; font-size: .95rem; margin-top: 2px; }
+  .lutador.golpeado { animation: golpeado .45s; }
+  @keyframes golpeado { 20% { transform: translateX(-9px) rotate(-3deg); filter: brightness(1.6) saturate(.5); } 60% { transform: translateX(7px) rotate(2deg); } }
+  .lutador.venceu { transform: scale(1.06); }
+  .vida { display: flex; justify-content: center; gap: 4px; font-size: 1.15rem; margin-top: 4px; }
+  .vida i { font-style: normal; color: var(--rosa); transition: opacity .3s, filter .3s; }
+  .vida i.perdida { opacity: .25; filter: grayscale(1); }
+  .vs { font-family: var(--serif); color: var(--ouro); font-size: 1.3rem; padding-bottom: 60px; }
+  .mesa { display: flex; justify-content: center; gap: 14px; width: min(94vw, 440px); margin-top: 10px; }
+  .carta {
+    flex: 1; min-height: 96px; border-radius: 16px; background: rgba(185,179,232,.1); border: 1px solid rgba(185,179,232,.25);
+    display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 6px; text-align: center;
+  }
+  .carta svg { width: 60px; height: 45px; }
+  .carta span { font-size: .82rem; margin-top: 4px; color: var(--texto-suave); }
+  .carta .interrog { font-family: var(--serif); font-size: 1.8rem; color: var(--texto-suave); }
+  .carta.p { --c1: #b6f23a; --c2: #ffd54a; }
+  .carta.m { --c1: #ffd6e5; --c2: #a25be0; }
+  .carta.ganhou { border-color: var(--ouro); background: rgba(255,217,138,.15); }
+  .duelo-texto { min-height: 3.2em; width: min(90vw, 400px); text-align: center; margin: 12px 0 8px; line-height: 1.45; }
+  .golpes { display: flex; gap: 8px; width: min(94vw, 440px); }
+  .golpe-btn {
+    flex: 1; background: rgba(185,179,232,.12); border: 1px solid rgba(185,179,232,.35); border-radius: 16px;
+    padding: 10px 4px 10px; color: var(--texto); font-size: .82rem; line-height: 1.25; --c1: #b6f23a; --c2: #ffd54a;
+  }
+  .golpe-btn svg { display: block; width: 52px; height: 39px; margin: 0 auto 4px; }
+  .golpe-btn:hover:not(:disabled) { background: rgba(185,179,232,.24); }
+  .golpe-btn:disabled { opacity: .5; }
+  .regra { color: var(--texto-suave); font-size: .82rem; text-align: center; margin: 10px 12px 12px; }
+
+  /* ---------- Cadê o zunk? ---------- */
+  .infil { --tam: min(94vw, 420px, calc((100dvh - 250px) / 1.15)); }
+  .campo-caixa { position: relative; width: var(--tam); margin: 0 auto; }
+  .barra-tempo { height: 6px; border-radius: 3px; background: rgba(185,179,232,.2); overflow: hidden; margin-bottom: 8px; }
+  .barra-tempo i { display: block; height: 100%; width: 100%; background: var(--ouro); transition: width .1s linear; }
+  .campo {
+    position: relative; width: 100%; height: calc(var(--tam) * 1.15); border-radius: 20px; overflow: hidden;
+    background: radial-gradient(100% 80% at 50% 100%, #2f2a70 0%, #1b1746 100%); border: 1px solid rgba(185,179,232,.22);
+    touch-action: manipulation; -webkit-user-select: none; user-select: none;
+  }
+  .pessoa { position: absolute; cursor: pointer; }
+  .pessoa svg { display: block; width: 100%; height: auto; overflow: visible; pointer-events: none; }
+  .pessoa.errou { animation: tremer .3s; filter: grayscale(.6); }
+  .pessoa.achou::after, .pessoa.revelado::after {
+    content: ""; position: absolute; left: -22%; right: -22%; top: -8%; bottom: -8%; border-radius: 50%;
+    border: 3px solid var(--ouro); pointer-events: none; animation: anel .6s ease-out both;
+  }
+  .pessoa.revelado::after { border-color: var(--rosa); animation: anel .6s ease-out both, pulsa-anel 1s .6s ease-in-out infinite; }
+  @keyframes anel { from { transform: scale(2); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  @keyframes pulsa-anel { 50% { transform: scale(1.12); } }
+  .campo .flutua { position: absolute; }
+
+  /* ---------- Cartão largo do placar no fliperama ---------- */
+  .cartao-jogo.largo { grid-column: 1 / -1; display: flex; align-items: center; gap: 14px; text-align: left; }
+  .cartao-jogo.largo .arte { height: 56px; margin: 0; flex: none; }
+  .cartao-jogo.largo .txt { flex: 1; }
+
+  /* ---------- Placar do casal ---------- */
+  #vista-placar, #vista-jardim { overflow-y: auto; }
+  .pl-corpo { width: min(94vw, 460px); margin: 6px auto 24px; padding: 0 2px; }
+  .pl-quem { text-align: center; padding: 28px 8px; }
+  .pl-quem h3, .pl-acao h3 { font-family: var(--serif); font-weight: 400; font-size: 1.25rem; margin: 0 0 10px; }
+  .pl-quem p, .pl-acao p { color: var(--texto-suave); line-height: 1.5; margin: 0 0 16px; font-size: .95rem; }
+  .pl-quem .linha { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+  .pl-tab { background: rgba(185,179,232,.1); border: 1px solid rgba(185,179,232,.22); border-radius: 18px; padding: 6px 12px 10px; margin-top: 8px; }
+  .pl-l { display: grid; grid-template-columns: 1.5fr 1fr 1fr; align-items: center; gap: 8px; padding: 10px 0; border-top: 1px solid rgba(185,179,232,.14); }
+  .pl-l:first-child { border-top: 0; }
+  .pl-l > span { font-size: .95rem; }
+  .pl-l > span small { display: block; color: var(--texto-suave); font-size: .75rem; }
+  .pl-l > b { font-family: var(--serif); font-weight: 400; font-size: 1.25rem; text-align: center; font-variant-numeric: tabular-nums; color: var(--texto-suave); }
+  .pl-l > b.vence { color: var(--ouro); }
+  .pl-l > b.vence::before { content: "\2605 "; font-size: .8em; }
+  .pl-cab > b { font-size: 1rem; color: var(--texto); }
+  .pl-cab > b small { display: block; font-family: var(--sans); font-size: .72rem; color: var(--rosa); }
+  .pl-ate { color: var(--texto-suave); font-size: .82rem; text-align: center; margin: 8px 0 0; }
+  .pl-acao { margin-top: 22px; background: rgba(185,179,232,.08); border-radius: 18px; padding: 16px 14px; }
+  .pl-acao textarea {
+    width: 100%; min-height: 64px; resize: vertical; background: rgba(15,13,42,.6); color: var(--texto);
+    border: 1px solid rgba(185,179,232,.3); border-radius: 12px; padding: 10px; font: .8rem/1.4 ui-monospace, Menlo, monospace; margin-bottom: 10px;
+  }
+  .pl-botoes { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+  .pl-botoes > * { flex: 1 1 150px; text-align: center; text-decoration: none; padding: 12px 14px; font-size: .95rem; }
+  .pl-sec { background: transparent; border: 1px solid rgba(185,179,232,.45); border-radius: 999px; padding: 12px 18px; color: var(--texto); font-weight: 500; }
+  .pl-msg { min-height: 1.4em; color: var(--rosa); font-size: .9rem; margin: 4px 0 0 !important; }
+
+  /* ---------- Jardim ---------- */
+  .aba { position: relative; }
+  .aba.alerta::after { content: ""; position: absolute; top: 8px; right: calc(50% - 38px); width: 9px; height: 9px; border-radius: 50%; background: var(--rosa); }
+  .jd-cena { width: min(94vw, 460px); margin: 8px auto 0; border-radius: 20px; overflow: hidden; border: 1px solid rgba(185,179,232,.25); flex: none; }
+  .jd-ceu { position: relative; height: 84px; background: linear-gradient(#7cc8ff, #d6f0ff); transition: background .6s; }
+  .hora-tarde .jd-ceu { background: linear-gradient(#ff8f6b, #ffd9a0); }
+  .hora-noite .jd-ceu { background: linear-gradient(#121033, #2a2566); }
+  .jd-astro { position: absolute; width: 30px; height: 30px; border-radius: 50%; transform: translateX(-50%); }
+  .jd-astro.sol { background: radial-gradient(circle, #fff6c2, #ffc857); box-shadow: 0 0 22px 8px rgba(255,200,87,.55); }
+  .jd-astro.lua { background: transparent; box-shadow: inset -9px -2px 0 0 #f3f0ff; }
+  .jd-morros { position: absolute; left: 0; right: 0; bottom: 0; width: 100%; height: 44px; display: block; }
+  .jd-espantalho { position: absolute; left: 66%; bottom: 3px; height: 54px; width: auto; overflow: visible; }
+  .jd-chip { position: absolute; top: 8px; display: flex; align-items: center; gap: 6px; background: rgba(15,13,42,.72); border-radius: 999px; padding: 5px 12px; font-weight: 600; font-size: .95rem; color: var(--texto); font-variant-numeric: tabular-nums; }
+  .jd-chip.dia { left: 8px; }
+  .jd-chip.din { right: 8px; }
+  .jd-chip .moeda { width: 18px; height: 18px; }
+  .jd-chip.sacudir { animation: tremer .35s; }
+  .jd-campo { background-color: #4e9b49; background-image: radial-gradient(circle at 20% 30%, rgba(255,255,255,.08) 0 2px, transparent 3px), radial-gradient(circle at 70% 60%, rgba(0,0,0,.1) 0 2px, transparent 3px); background-size: 26px 26px, 34px 34px; padding: 4px 12px 8px; }
+  .hora-noite .jd-campo, .hora-noite .jd-espantalho { filter: brightness(.6) saturate(.85); }
+  .hora-tarde .jd-campo { filter: brightness(.88) sepia(.18); }
+  .jd-cerca { position: relative; display: flex; justify-content: space-between; align-items: flex-end; height: 34px; padding: 0 2px; }
+  .jd-cerca::after { content: ""; position: absolute; left: -12px; right: -12px; bottom: 5px; height: 6px; background: #9a6a3a; box-shadow: 0 2px 0 #6b4424; }
+  .jd-cerca svg { position: relative; z-index: 1; height: 32px; width: auto; }
+  .jd-grade { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; margin: 6px 0; }
+  .jd-parc { position: relative; padding: 0; border: 0; background: none; aspect-ratio: 1; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+  .jd-parc svg { display: block; width: 100%; height: 100%; overflow: visible; }
+  .jd-parc:focus-visible { outline: 3px solid var(--ouro); outline-offset: 1px; border-radius: 10px; }
+  .jd-parc .planta { transform-box: fill-box; transform-origin: 50% 100%; }
+  .jd-parc.pronta .planta { animation: balancar-j 1.8s ease-in-out infinite; }
+  .jd-parc.pronta::after { content: ""; position: absolute; right: 4px; top: 4px; width: 9px; height: 9px; border-radius: 50%; background: #fff6c2; box-shadow: 0 0 8px 3px rgba(255,246,194,.9); }
+  @keyframes balancar-j { 50% { transform: rotate(3deg) scale(1.03); } }
+  .jd-parc.plantou svg { animation: brotar .4s ease-out; }
+  @keyframes brotar { from { transform: scale(.7); } to { transform: none; } }
+  .jd-preco { position: absolute; left: 0; right: 0; bottom: 8px; display: flex; justify-content: center; align-items: center; gap: 3px; font-size: .78rem; font-weight: 700; color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,.7); pointer-events: none; }
+  .jd-preco .moeda { width: 14px; height: 14px; }
+  .jd-gota { position: absolute; top: 10%; width: 6px; height: 10px; border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%; background: #8fd3ff; pointer-events: none; animation: gota .7s ease-in forwards; }
+  @keyframes gota { from { transform: translateY(0); opacity: 1; } to { transform: translateY(26px); opacity: 0; } }
+  .jd-dica { text-align: center; color: var(--texto-suave); font-size: .92rem; margin: 8px 12px 0; min-height: 1.3em; }
+  .jd-ferramentas { display: flex; flex-wrap: nowrap; justify-content: center; gap: 5px; padding: 8px 6px 12px; width: min(98vw, 480px); margin: 0 auto; }
+  .jd-ferr {
+    position: relative; display: flex; flex-direction: column; align-items: center; gap: 2px; flex: 1 1 0; min-width: 0; padding: 6px 2px 7px;
+    background: rgba(185,179,232,.1); border: 1px solid rgba(185,179,232,.3); border-radius: 14px; color: var(--texto); font-size: .72rem;
+  }
+  .jd-ferr svg { width: 34px; height: 34px; }
+  .jd-ferr em { font-style: normal; display: flex; align-items: center; gap: 2px; color: var(--ouro); font-weight: 600; }
+  .jd-ferr em .moeda { width: 12px; height: 12px; }
+  .jd-ferr[aria-pressed="true"] { background: rgba(255,217,138,.22); border-color: var(--ouro); }
+  .jd-ferr.loja { background: var(--ouro); color: #2a2050; border-color: var(--ouro); font-weight: 700; justify-content: center; font-size: .85rem; }
+  .jd-aviso {
+    position: fixed; left: 50%; top: calc(14px + env(safe-area-inset-top, 0px)); transform: translate(-50%, -10px); z-index: 40;
+    background: rgba(15,13,42,.95); border: 1px solid rgba(255,217,138,.6); color: var(--ouro); border-radius: 999px;
+    padding: 8px 18px; font-weight: 600; font-size: .92rem; max-width: 92vw; text-align: center;
+    opacity: 0; pointer-events: none; transition: opacity .25s, transform .25s;
+  }
+  .jd-aviso.visivel { opacity: 1; transform: translate(-50%, 0); }
+  .jd-fundo { position: fixed; inset: 0; z-index: 35; display: flex; align-items: flex-end; justify-content: center; background: rgba(10,8,30,.7); padding: 0 0 env(safe-area-inset-bottom, 0px); }
+  .jd-fundo[hidden] { display: none; }
+  .jd-folha { width: 100%; max-width: 480px; background: #211c4e; border: 1px solid rgba(185,179,232,.25); border-radius: 22px 22px 0 0; padding: 22px 20px 20px; max-height: 86dvh; overflow-y: auto; }
+  .jd-folha h3 { font-family: var(--serif); font-weight: 400; font-size: 1.35rem; margin: 0 0 12px; color: var(--ouro); }
+  .jd-folha p { color: var(--texto-suave); line-height: 1.55; margin: 0 0 14px; }
+  .jd-item { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 0; border-top: 1px solid rgba(185,179,232,.16); }
+  .jd-item b { display: block; font-weight: 600; }
+  .jd-item span { display: block; color: var(--texto-suave); font-size: .85rem; margin-top: 2px; }
+  .jd-item button, .jd-folha .fecha {
+    display: inline-flex; align-items: center; gap: 5px; background: var(--ouro); color: #2a2050; border: 0; border-radius: 999px; padding: 9px 16px; font-weight: 700; flex: none;
+  }
+  .jd-item button .moeda { width: 16px; height: 16px; }
+  .jd-item button:disabled { opacity: .45; }
+  .jd-folha .fecha { margin-top: 12px; background: transparent; color: var(--texto); border: 1px solid rgba(185,179,232,.45); font-weight: 500; }
+  .jd-folha .fecha.principal { background: var(--ouro); color: #2a2050; border: 0; font-weight: 700; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .jd-parc.pronta .planta, .jd-parc.plantou svg, .jd-chip.sacudir, .jd-gota { animation: none; }
+    .estrela::before, .btn-hoje.novo::after { animation: none; }
+    .lutador.golpeado, .pessoa.errou, .pessoa.achou::after, .pessoa.revelado::after { animation: none; }
+    .bicho, .gato-caixa, .gato, .gato .cabeca { transition: none; }
+    .gato.feliz .rabo, .gato.mastiga .boca, .gato.mastiga .cabeca, .zzz, .arena.tremer { animation: none; }
+    svg.linhas line { animation: none; }
+    .intro, .fundo-cartao, .cartao, .final { transition: none; }
+  }
+</style>
+</head>
+<body>
+
+<!--
+  ==========================================================
+  COMO PERSONALIZAR: mexa só nesta parte do <script> lá embaixo,
+  onde está escrito "CONFIGURAÇÕES". Troque o nome, a data e os
+  textos das estrelas pelo que só vocês dois sabem.
+  ==========================================================
+-->
+
+<div class="intro" id="intro">
+  <h1 id="tituloIntro"></h1>
+  <p id="textoIntro"></p>
+  <button class="btn-principal" id="comecar">Bora</button>
+</div>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <!-- RIMK: alien grey verde-limão com bigode pontudo -->
+    <g id="rimk">
+      <path d="M28 98 Q50 90 72 98 L77 120 L23 120Z" fill="#5b3fd0"/>
+      <path d="M50 101 l2.2 4.4 4.8.7 -3.5 3.4 .8 4.8 -4.3-2.3 -4.3 2.3 .8-4.8 -3.5-3.4 4.8-.7z" fill="#ffd54a"/>
+      <rect x="44" y="82" width="12" height="18" rx="4" fill="#9bd21f"/>
+      <path d="M50 8 C74 8 90 26 86 48 C83 66 68 84 50 86 C32 84 17 66 14 48 C10 26 26 8 50 8Z" fill="#b6f23a" stroke="#6ea50f" stroke-width="2"/>
+      <path d="M22 40 C30 34 42 40 46 52 C36 56 24 50 22 40Z" fill="#12101f"/>
+      <path d="M78 40 C70 34 58 40 54 52 C64 56 76 50 78 40Z" fill="#12101f"/>
+      <circle cx="32" cy="43" r="2.2" fill="#fff"/><circle cx="68" cy="43" r="2.2" fill="#fff"/>
+      <circle cx="47.5" cy="60" r="1.2" fill="#3f6a08"/><circle cx="52.5" cy="60" r="1.2" fill="#3f6a08"/>
+      <path d="M50 70 C44 62 34 64 28 71 C21 78 11 73 8 49 C17 62 26 62 34 61 C42 60 47 63 50 65Z" fill="#1b1208"/>
+      <path d="M50 70 C56 62 66 64 72 71 C79 78 89 73 92 49 C83 62 74 62 66 61 C58 60 53 63 50 65Z" fill="#1b1208"/>
+      <path d="M45 79 Q50 82 55 79" stroke="#3f6a08" stroke-width="2" fill="none" stroke-linecap="round"/>
+    </g>
+    <!-- RIMK ELE: careca, bigode, poncho preto e chapéu de cowboy -->
+    <g id="rimkEle"><path d="M20 101 Q50 84 80 101 L90 120 L10 120Z" fill="#1b1b26"/><path d="M12 113 L88 113" stroke="#c9982a" stroke-width="3"/><path d="M41 94 L50 110 L59 94Z" fill="rgba(0,0,0,.28)"/><rect x="44" y="82" width="12" height="18" rx="4" fill="#9bd21f"/><path d="M50 8 C74 8 90 26 86 48 C83 66 68 84 50 86 C32 84 17 66 14 48 C10 26 26 8 50 8Z" fill="#b6f23a" stroke="#6ea50f" stroke-width="2"/><path d="M22 40 C30 34 42 40 46 52 C36 56 24 50 22 40Z" fill="#12101f"/><path d="M78 40 C70 34 58 40 54 52 C64 56 76 50 78 40Z" fill="#12101f"/><circle cx="32" cy="43" r="2.2" fill="#fff"/><circle cx="68" cy="43" r="2.2" fill="#fff"/><circle cx="47.5" cy="60" r="1.2" fill="#3f6a08"/><circle cx="52.5" cy="60" r="1.2" fill="#3f6a08"/><path d="M50 70 C44 62 34 64 28 71 C21 78 11 73 8 49 C17 62 26 62 34 61 C42 60 47 63 50 65Z" fill="#1b1208"/><path d="M50 70 C56 62 66 64 72 71 C79 78 89 73 92 49 C83 62 74 62 66 61 C58 60 53 63 50 65Z" fill="#1b1208"/><path d="M45 79 Q50 82 55 79" stroke="#3f6a08" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M30 12 Q29 -12 50 -12 Q71 -12 70 12Z" fill="#8a5a30" stroke="#4a2c12" stroke-width="1.5"/><path d="M30.5 5 Q50 11 69.5 5 L70 12 Q50 18 30 12Z" fill="#2a1a0c"/><path d="M3 13 Q50 22 97 13 Q92 6 50 8 Q8 6 3 13Z" fill="#8a5a30" stroke="#4a2c12" stroke-width="1.5" stroke-linejoin="round"/></g>
+    <!-- RIMK ELA: cabelo longo castanho, bigode, poncho vermelho e chapéu de cowboy -->
+    <g id="rimkEla"><path d="M20 101 Q50 84 80 101 L90 120 L10 120Z" fill="#d92b45"/><path d="M12 113 L88 113" stroke="#ffd54a" stroke-width="3"/><path d="M41 94 L50 110 L59 94Z" fill="rgba(0,0,0,.28)"/><rect x="44" y="82" width="12" height="18" rx="4" fill="#9bd21f"/><path d="M14 40 C4 70 6 100 20 113 L33 100 C26 80 27 62 27 46Z" fill="#6b3f24"/><path d="M86 40 C96 70 94 100 80 113 L67 100 C74 80 73 62 73 46Z" fill="#6b3f24"/><path d="M50 8 C74 8 90 26 86 48 C83 66 68 84 50 86 C32 84 17 66 14 48 C10 26 26 8 50 8Z" fill="#b6f23a" stroke="#6ea50f" stroke-width="2"/><path d="M22 40 C30 34 42 40 46 52 C36 56 24 50 22 40Z" fill="#12101f"/><path d="M78 40 C70 34 58 40 54 52 C64 56 76 50 78 40Z" fill="#12101f"/><circle cx="32" cy="43" r="2.2" fill="#fff"/><circle cx="68" cy="43" r="2.2" fill="#fff"/><circle cx="47.5" cy="60" r="1.2" fill="#3f6a08"/><circle cx="52.5" cy="60" r="1.2" fill="#3f6a08"/><path d="M50 70 C44 62 34 64 28 71 C21 78 11 73 8 49 C17 62 26 62 34 61 C42 60 47 63 50 65Z" fill="#1b1208"/><path d="M50 70 C56 62 66 64 72 71 C79 78 89 73 92 49 C83 62 74 62 66 61 C58 60 53 63 50 65Z" fill="#1b1208"/><path d="M45 79 Q50 82 55 79" stroke="#3f6a08" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M30 12 Q29 -12 50 -12 Q71 -12 70 12Z" fill="#8a5a30" stroke="#4a2c12" stroke-width="1.5"/><path d="M30.5 5 Q50 11 69.5 5 L70 12 Q50 18 30 12Z" fill="#2a1a0c"/><path d="M3 13 Q50 22 97 13 Q92 6 50 8 Q8 6 3 13Z" fill="#8a5a30" stroke="#4a2c12" stroke-width="1.5" stroke-linejoin="round"/></g>
+    <!-- ZUNK: alien grey de pele branca -->
+    <g id="zunk">
+      <path d="M28 98 Q50 90 72 98 L77 120 L23 120Z" fill="#4c5573"/>
+      <circle cx="50" cy="108" r="3.5" fill="#e0526a"/>
+      <rect x="44" y="82" width="12" height="18" rx="4" fill="#e6e6ee"/>
+      <path d="M50 8 C74 8 90 26 86 48 C83 66 68 84 50 86 C32 84 17 66 14 48 C10 26 26 8 50 8Z" fill="#f7f7fb" stroke="#a9abc0" stroke-width="2"/>
+      <path d="M22 40 C30 34 42 40 46 52 C36 56 24 50 22 40Z" fill="#12101f"/>
+      <path d="M78 40 C70 34 58 40 54 52 C64 56 76 50 78 40Z" fill="#12101f"/>
+      <circle cx="32" cy="43" r="2.2" fill="#fff"/><circle cx="68" cy="43" r="2.2" fill="#fff"/>
+      <path d="M20 30 L46 38" stroke="#5a5c74" stroke-width="3" stroke-linecap="round"/>
+      <path d="M80 30 L54 38" stroke="#5a5c74" stroke-width="3" stroke-linecap="round"/>
+      <circle cx="47.5" cy="62" r="1.2" fill="#8d8fa6"/><circle cx="52.5" cy="62" r="1.2" fill="#8d8fa6"/>
+      <path d="M42 77 Q50 72 58 77" stroke="#7b7d96" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+    </g>
+    <!-- MATMALLO: zunk supremo, com coroa e capa -->
+    <g id="matmallo">
+      <path d="M12 96 Q50 82 88 96 L96 120 L4 120Z" fill="#7a2fd0"/>
+      <path d="M28 98 Q50 90 72 98 L77 120 L23 120Z" fill="#4c5573"/>
+      <rect x="44" y="82" width="12" height="18" rx="4" fill="#e6e6ee"/>
+      <path d="M50 8 C76 8 92 26 88 48 C85 68 68 86 50 88 C32 86 15 68 12 48 C8 26 24 8 50 8Z" fill="#ffffff" stroke="#a9abc0" stroke-width="2"/>
+      <circle cx="24" cy="62" r="7" fill="#ffb3c7" opacity=".75"/><circle cx="76" cy="62" r="7" fill="#ffb3c7" opacity=".75"/>
+      <path d="M22 40 C30 34 42 40 46 52 C36 56 24 50 22 40Z" fill="#12101f"/>
+      <path d="M78 40 C70 34 58 40 54 52 C64 56 76 50 78 40Z" fill="#12101f"/>
+      <circle cx="32" cy="43" r="2.2" fill="#fff"/><circle cx="68" cy="43" r="2.2" fill="#fff"/>
+      <path d="M18 29 L46 38" stroke="#5a5c74" stroke-width="3.4" stroke-linecap="round"/>
+      <path d="M82 29 L54 38" stroke="#5a5c74" stroke-width="3.4" stroke-linecap="round"/>
+      <circle cx="47.5" cy="62" r="1.2" fill="#8d8fa6"/><circle cx="52.5" cy="62" r="1.2" fill="#8d8fa6"/>
+      <path d="M41 78 Q50 72 59 78" stroke="#7b7d96" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+      <path d="M30 14 L31 -4 L41 7 L50 -9 L59 7 L69 -4 L70 14Z" fill="#ffcf3f" stroke="#c9982a" stroke-width="1.6" stroke-linejoin="round"/>
+      <circle cx="50" cy="5" r="3" fill="#e0526a"/>
+    </g>
+    <!-- ZÉPRIKITO: rimk supremo, com coroa, capa e bigodão -->
+    <g id="zeprikito">
+      <path d="M12 96 Q50 82 88 96 L96 120 L4 120Z" fill="#e53960"/>
+      <path d="M28 98 Q50 90 72 98 L77 120 L23 120Z" fill="#5b3fd0"/>
+      <path d="M50 101 l2.2 4.4 4.8.7 -3.5 3.4 .8 4.8 -4.3-2.3 -4.3 2.3 .8-4.8 -3.5-3.4 4.8-.7z" fill="#ffd54a"/>
+      <rect x="44" y="82" width="12" height="18" rx="4" fill="#9bd21f"/>
+      <path d="M50 8 C74 8 90 26 86 48 C83 66 68 84 50 86 C32 84 17 66 14 48 C10 26 26 8 50 8Z" fill="#b6f23a" stroke="#6ea50f" stroke-width="2"/>
+      <path d="M22 40 C30 34 42 40 46 52 C36 56 24 50 22 40Z" fill="#12101f"/>
+      <path d="M78 40 C70 34 58 40 54 52 C64 56 76 50 78 40Z" fill="#12101f"/>
+      <circle cx="32" cy="43" r="2.2" fill="#fff"/><circle cx="68" cy="43" r="2.2" fill="#fff"/>
+      <circle cx="47.5" cy="60" r="1.2" fill="#3f6a08"/><circle cx="52.5" cy="60" r="1.2" fill="#3f6a08"/>
+      <path d="M50 71 C43 61 32 63 25 71 C17 79 6 74 3 42 C15 60 24 60 33 60 C42 59 47 62 50 65Z" fill="#1b1208"/>
+      <path d="M50 71 C57 61 68 63 75 71 C83 79 94 74 97 42 C85 60 76 60 67 60 C58 59 53 62 50 65Z" fill="#1b1208"/>
+      <path d="M45 80 Q50 83 55 80" stroke="#3f6a08" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <path d="M30 14 L31 -4 L41 7 L50 -9 L59 7 L69 -4 L70 14Z" fill="#ffcf3f" stroke="#c9982a" stroke-width="1.6" stroke-linejoin="round"/>
+      <circle cx="50" cy="5" r="3" fill="#5b3fd0"/>
+    </g>
+    <!-- ZUNK DISFARÇADO: pele branca, bigode falso, uniforme de zunk -->
+    <g id="zunkfake">
+      <path d="M28 98 Q50 90 72 98 L77 120 L23 120Z" fill="#4c5573"/>
+      <circle cx="50" cy="108" r="3.5" fill="#e0526a"/>
+      <rect x="44" y="82" width="12" height="18" rx="4" fill="#e6e6ee"/>
+      <path d="M50 8 C74 8 90 26 86 48 C83 66 68 84 50 86 C32 84 17 66 14 48 C10 26 26 8 50 8Z" fill="#f7f7fb" stroke="#a9abc0" stroke-width="2"/>
+      <path d="M22 40 C30 34 42 40 46 52 C36 56 24 50 22 40Z" fill="#12101f"/>
+      <path d="M78 40 C70 34 58 40 54 52 C64 56 76 50 78 40Z" fill="#12101f"/>
+      <circle cx="32" cy="43" r="2.2" fill="#fff"/><circle cx="68" cy="43" r="2.2" fill="#fff"/>
+      <circle cx="47.5" cy="60" r="1.2" fill="#8d8fa6"/><circle cx="52.5" cy="60" r="1.2" fill="#8d8fa6"/>
+      <path d="M50 70 C44 62 34 64 28 71 C21 78 11 73 8 49 C17 62 26 62 34 61 C42 60 47 63 50 65Z" fill="#1b1208"/>
+      <path d="M50 70 C56 62 66 64 72 71 C79 78 89 73 92 49 C83 62 74 62 66 61 C58 60 53 63 50 65Z" fill="#1b1208"/>
+      <path d="M45 79 Q50 82 55 79" stroke="#7b7d96" stroke-width="2" fill="none" stroke-linecap="round"/>
+    </g>
+    <!-- ZUNK DISFARÇADO NÍVEL DIFÍCIL: cara pintada de verde-claro, uniforme de rimk -->
+    <g id="zunkverde">
+      <path d="M28 98 Q50 90 72 98 L77 120 L23 120Z" fill="#5b3fd0"/>
+      <path d="M50 101 l2.2 4.4 4.8.7 -3.5 3.4 .8 4.8 -4.3-2.3 -4.3 2.3 .8-4.8 -3.5-3.4 4.8-.7z" fill="#ffd54a"/>
+      <rect x="44" y="82" width="12" height="18" rx="4" fill="#a2d63a"/>
+      <path d="M50 8 C74 8 90 26 86 48 C83 66 68 84 50 86 C32 84 17 66 14 48 C10 26 26 8 50 8Z" fill="#cdf58a" stroke="#7fa83c" stroke-width="2"/>
+      <path d="M22 40 C30 34 42 40 46 52 C36 56 24 50 22 40Z" fill="#12101f"/>
+      <path d="M78 40 C70 34 58 40 54 52 C64 56 76 50 78 40Z" fill="#12101f"/>
+      <circle cx="32" cy="43" r="2.2" fill="#fff"/><circle cx="68" cy="43" r="2.2" fill="#fff"/>
+      <path d="M22 33 L44 41" stroke="#6b8f2c" stroke-width="2.4" stroke-linecap="round"/>
+      <path d="M78 33 L56 41" stroke="#6b8f2c" stroke-width="2.4" stroke-linecap="round"/>
+      <circle cx="47.5" cy="60" r="1.2" fill="#3f6a08"/><circle cx="52.5" cy="60" r="1.2" fill="#3f6a08"/>
+      <path d="M50 70 C44 62 34 64 28 71 C21 78 11 73 8 49 C17 62 26 62 34 61 C42 60 47 63 50 65Z" fill="#1b1208"/>
+      <path d="M50 70 C56 62 66 64 72 71 C79 78 89 73 92 49 C83 62 74 62 66 61 C58 60 53 63 50 65Z" fill="#1b1208"/>
+      <path d="M45 79 Q50 82 55 79" stroke="#3f6a08" stroke-width="2" fill="none" stroke-linecap="round"/>
+    </g>
+    <!-- Ícones dos golpes do duelo (cores vêm de --c1 e --c2) -->
+    <g id="ic-laser">
+      <path d="M32 27 C26 21 18 23 14 28 C9 34 4 31 2 20 C9 28 14 27 20 26 C26 25 30 27 32 29Z" style="fill:var(--c2)"/>
+      <path d="M32 27 C38 21 46 23 50 28 C55 34 60 31 62 20 C55 28 50 27 44 26 C38 25 34 27 32 29Z" style="fill:var(--c2)"/>
+      <path d="M0 24 L64 24" stroke="#ff4d6d" stroke-width="5" stroke-linecap="round" opacity=".55"/>
+      <path d="M0 24 L64 24" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/>
+    </g>
+    <g id="ic-escudo">
+      <path d="M32 3 L55 11 V26 C55 38 45 44 32 47 C19 44 9 38 9 26 V11Z" style="fill:var(--c2);stroke:var(--c1)" stroke-width="3" stroke-linejoin="round"/>
+      <path d="M21 24 L22 12 L29 19Z" style="fill:var(--c1)"/><path d="M43 24 L42 12 L35 19Z" style="fill:var(--c1)"/>
+      <circle cx="32" cy="28" r="10" style="fill:var(--c1)"/>
+      <circle cx="28" cy="26" r="1.6" fill="#111"/><circle cx="36" cy="26" r="1.6" fill="#111"/>
+      <path d="M30.5 30 L33.5 30 L32 32Z" fill="#f28ba8"/>
+    </g>
+    <g id="ic-abraco">
+      <path d="M32 40 C10 27 6 12 18 8 C25 6 30 10 32 14 C34 10 39 6 46 8 C58 12 54 27 32 40Z" style="fill:var(--c1)"/>
+      <path d="M6 30 Q32 52 58 30" fill="none" style="stroke:var(--c2)" stroke-width="6" stroke-linecap="round"/>
+    </g>
+    <!-- Espantalho zunk de chapéu de palha (decoração do jardim) -->
+    <g id="espantalho">
+      <rect x="46" y="60" width="8" height="64" rx="3" fill="#8a5a30"/>
+      <rect x="4" y="94" width="92" height="8" rx="4" fill="#8a5a30"/>
+      <path d="M2 96 l-6 -4 M2 100 l-7 2 M98 96 l6 -4 M98 100 l7 2" stroke="#e8c76a" stroke-width="3" stroke-linecap="round"/>
+      <use href="#zunk"/>
+      <path d="M10 14 Q50 26 90 14 Q84 6 50 8 Q16 6 10 14Z" fill="#e8c76a" stroke="#b8923a" stroke-width="1.5"/>
+      <path d="M28 12 Q28 -10 50 -10 Q72 -10 72 12Z" fill="#f0d98a" stroke="#b8923a" stroke-width="1.5"/>
+      <path d="M28.5 4 Q50 10 71.5 4 L72 12 Q50 18 28 12Z" fill="#d94f5c"/>
+    </g>
+  </defs>
+</svg>
+
+<div class="app">
+<div class="vistas">
+  <section class="vista ativa" id="vista-ceu">
+  <header>
+    <h2 id="tituloTopo"></h2>
+    <div class="contadores">
+      <p class="contador" id="juntos" hidden><span class="rot">Juntos há</span><b id="tJuntos"></b></p>
+      <p class="contador" id="noivos" hidden><span class="rot">Noivos há</span><b id="tNoivos"></b></p>
+      <p class="contador" id="faltam" hidden><span class="rot">Faltam pra gente se ver</span><b id="tFaltam"></b></p>
+    </div>
+    <button class="btn-hoje" id="btnHoje">Recado do dia</button>
+    <p class="dica">Clica nas estrelas que tão brilhando.</p>
+  </header>
+  <main class="ceu" id="ceu" aria-label="Céu com estrelas">
+    <div class="fundo-estrelas" id="fundoEstrelas" aria-hidden="true"></div>
+    <svg class="linhas" id="linhas" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"></svg>
+    <div class="legenda"><strong>Constelação de Câncer</strong><span id="progresso" aria-live="polite"></span></div>
+  </main>
+  </section>
+
+  <section class="vista jogo" id="vista-jogo" aria-label="Jogo Rimks contra Zunks">
+    <div class="barra-topo"><button class="voltar" data-ir="fliper">&lsaquo; Fliperama</button><span class="titulo-jogo">Rimks vs Zunks</span></div>
+    <div class="placar" aria-live="off">
+      <span>Pontos<b id="jPontos">0</b></span>
+      <span>Tempo<b id="jTempo">45</b></span>
+      <span class="vidas" id="jVidas" aria-label="Vidas"></span>
+    </div>
+    <div class="arena-caixa">
+      <div class="arena" id="arena"></div>
+      <div class="aviso-jogo" id="jogoAviso" role="status"></div>
+    </div>
+
+    <div class="jogo-tela" id="jogoIntro">
+      <h2>Rimks vs Zunks</h2>
+      <p>Os zunks invadiram! Toca neles pra derrotar. Mas cuidado: rimk não se bate.</p>
+      <div class="elenco">
+        <figure><svg viewBox="0 -14 100 134" aria-hidden="true"><use href="#rimk"/></svg><b>Rimk</b><span>Do nosso time. Não bate!</span></figure>
+        <figure><svg viewBox="0 -14 100 134" aria-hidden="true"><use href="#zunk"/></svg><b>Zunk</b><span>O inimigo. Bate!</span></figure>
+        <figure><svg viewBox="0 -14 100 134" aria-hidden="true"><use href="#zeprikito"/></svg><b>ZéPrikito</b><span>Rimk supremo. Toca nele pra limpar a tela.</span></figure>
+        <figure><svg viewBox="0 -14 100 134" aria-hidden="true"><use href="#matmallo"/></svg><b>Matmallo</b><span>Zunk supremo. Aguenta vários toques.</span></figure>
+      </div>
+      <button class="btn-principal" id="jogar">Jogar</button>
+    </div>
+
+    <div class="jogo-tela" id="jogoFim" hidden>
+      <h2 id="fimTitulo"></h2>
+      <div class="fim-pontos" id="fimPontos">0</div>
+      <p class="fim-rank" id="fimRank"></p>
+      <p class="fim-rec" id="fimRec"></p>
+      <button class="btn-principal" id="jogarDeNovo">Jogar de novo</button>
+    </div>
+  </section>
+
+  <section class="vista" id="vista-gatos" aria-label="Cantinho dos gatinhos">
+    <div class="vista-cab">
+      <h2>Cantinho dos gatinhos</h2>
+      <p class="contagem"><span>Carinhos<b id="nCarinhos">0</b></span><span>Petiscos<b id="nPetiscos">0</b></span></p>
+      <p class="dica" id="dicaGatos">Passa o dedo nos gatinhos.</p>
+    </div>
+    <div class="status-gatos" id="statusGatos"></div>
+    <div class="palco-caixa">
+      <div class="palco" id="palco">
+        <div class="gato-caixa a">
+          <div class="gato laranja" role="button" tabindex="0" aria-label="Gatinho laranja, o Mat"></div>
+          <span class="zzz" aria-hidden="true">z z</span>
+          <span class="nome">Mat</span>
+        </div>
+        <div class="gato-caixa b">
+          <div class="gato preto" role="button" tabindex="0" aria-label="Gatinho preto, a Lulu"></div>
+          <span class="zzz" aria-hidden="true">z z</span>
+          <span class="nome">Lulu</span>
+        </div>
+        <div class="bolinha" id="bolinha" hidden>
+          <svg viewBox="0 0 40 44" aria-hidden="true"><circle cx="20" cy="20" r="16" fill="#f4a3b8"/><path d="M8 16 Q20 8 32 16 M6 22 Q20 14 34 22 M9 29 Q20 21 31 29" stroke="#c9587a" stroke-width="2" fill="none"/><path d="M30 31 Q38 38 33 43" stroke="#f4a3b8" stroke-width="3" fill="none" stroke-linecap="round"/></svg>
+        </div>
+      </div>
+    </div>
+    <div class="ferramentas">
+      <button class="ferr" data-f="carinho" aria-pressed="true">Carinho</button>
+      <button class="ferr" data-f="petisco" aria-pressed="false">Petisco</button>
+      <button class="ferr" data-f="bolinha" aria-pressed="false">Bolinha</button>
+      <button class="ferr toggle" id="btnJuntos" aria-pressed="false">Juntinhos</button>
+      <button class="ferr toggle" id="btnSono" aria-pressed="false">Cochilar</button>
+    </div>
+  </section>
+
+  <section class="vista" id="vista-fliper" aria-label="Fliperama">
+    <div class="vista-cab">
+      <h2>Fliperama</h2>
+      <p class="dica">Escolhe um jogo.</p>
+    </div>
+    <div class="menu-jogos">
+      <button class="cartao-jogo largo" data-ir="placar">
+        <span class="arte"><svg viewBox="0 -14 100 134" aria-hidden="true"><use href="#rimkEle"/></svg><svg viewBox="0 -14 100 134" aria-hidden="true"><use href="#rimkEla"/></svg></span>
+        <span class="txt"><b>Placar do casal</b><span class="desc">Vê os recordes do Mat e da Lulu lado a lado.</span></span>
+      </button>
+      <button class="cartao-jogo" data-ir="jogo">
+        <span class="arte"><svg viewBox="0 -14 100 134" aria-hidden="true"><use href="#zunk"/></svg><svg viewBox="0 -14 100 134" aria-hidden="true"><use href="#rimk"/></svg></span>
+        <b>Rimks vs Zunks</b><span class="desc">Bate nos zunks. Rimk não!</span><span class="rec" id="recZunks"></span>
+      </button>
+      <button class="cartao-jogo" data-ir="corrida">
+        <span class="arte"><svg viewBox="0 -14 100 134" aria-hidden="true"><use href="#rimkEle"/></svg><svg viewBox="0 -14 100 134" aria-hidden="true"><use href="#rimkEla"/></svg></span>
+        <b>Corrida no Horto</b><span class="desc">De moto pela serra, desvia dos obstáculos.</span><span class="rec" id="recCorrida"></span>
+      </button>
+      <button class="cartao-jogo" data-ir="duelo">
+        <span class="arte"><svg viewBox="0 -14 100 134" aria-hidden="true"><use href="#zeprikito"/></svg><svg viewBox="0 -14 100 134" aria-hidden="true"><use href="#matmallo"/></svg></span>
+        <b>ZéPrikito vs Matmallo</b><span class="desc">A batalha final, em turnos.</span><span class="rec" id="recDuelo"></span>
+      </button>
+      <button class="cartao-jogo" data-ir="infiltrado">
+        <span class="arte"><svg viewBox="0 -14 100 134" aria-hidden="true"><use href="#zunkfake"/></svg></span>
+        <b>Cadê o zunk?</b><span class="desc">Um zunk se disfarçou de rimk.</span><span class="rec" id="recInfil"></span>
+      </button>
+    </div>
+  </section>
+
+  <section class="vista corrida" id="vista-corrida" aria-label="Corrida no Horto">
+    <div class="barra-topo"><button class="voltar" data-ir="fliper">&lsaquo; Fliperama</button><span class="titulo-jogo">Corrida no Horto</span></div>
+    <div class="placar">
+      <span>Pontos<b id="cPontos">0</b></span>
+      <span>Açaís<b id="cAcai">0</b></span>
+      <span>Recorde<b id="cRec">0</b></span>
+    </div>
+    <div class="canvas-caixa"><canvas id="corridaCanvas" role="img" aria-label="Dois rimks de moto, de poncho e chapéu de cowboy, no pôr do sol da serra do Horto. Toque para pular."></canvas></div>
+    <div class="jogo-tela" id="corridaIntro">
+      <h2>Corrida no Horto</h2>
+      <p>Dois rimks de moto, de poncho e chapéu de cowboy, no pôr do sol da serra do Horto. Toca na tela (ou aperta espaço) pra pular. Desvia dos pneus furados, zunks, pedras, mandacarus e buracos, e pega os açaís! Os obstáculos mudam a cada corrida.</p>
+      <button class="btn-principal" id="correr">Correr</button>
+    </div>
+    <div class="jogo-tela" id="corridaFim" hidden>
+      <h2 id="cFimTitulo">Ih, furou o pneu!</h2>
+      <div class="fim-pontos" id="cFimPontos">0</div>
+      <p class="fim-rank" id="cFimAcai"></p>
+      <p class="fim-rec" id="cFimRec"></p>
+      <button class="btn-principal" id="correrDeNovo">Correr de novo</button>
+    </div>
+  </section>
+
+  <section class="vista duelo" id="vista-duelo" aria-label="ZéPrikito contra Matmallo">
+    <div class="barra-topo"><button class="voltar" data-ir="fliper">&lsaquo; Fliperama</button><span class="titulo-jogo">ZéPrikito vs Matmallo</span></div>
+    <div class="ringue">
+      <div class="lutador" id="luP"><svg class="perso" viewBox="0 -14 100 134" aria-hidden="true"><use href="#zeprikito"/></svg><b>ZéPrikito</b><div class="vida" id="vidaP" aria-label="Vidas do ZéPrikito"></div></div>
+      <div class="vs">VS</div>
+      <div class="lutador" id="luM"><svg class="perso" viewBox="0 -14 100 134" aria-hidden="true"><use href="#matmallo"/></svg><b>Matmallo</b><div class="vida" id="vidaM" aria-label="Vidas do Matmallo"></div></div>
+    </div>
+    <div class="mesa">
+      <div class="carta p" id="cartaP"><span class="interrog">?</span></div>
+      <div class="carta m" id="cartaM"><span class="interrog">?</span></div>
+    </div>
+    <p class="duelo-texto" id="dueloTexto" role="status">Escolhe o seu golpe!</p>
+    <div class="golpes">
+      <button class="golpe-btn" data-g="L"><svg viewBox="0 0 64 48" aria-hidden="true"><use href="#ic-laser"/></svg>Laser de Bigode</button>
+      <button class="golpe-btn" data-g="E"><svg viewBox="0 0 64 48" aria-hidden="true"><use href="#ic-escudo"/></svg>Escudo de Gatinho</button>
+      <button class="golpe-btn" data-g="A"><svg viewBox="0 0 64 48" aria-hidden="true"><use href="#ic-abraco"/></svg>Abraço Supremo</button>
+    </div>
+    <p class="regra">Laser vence Abraço. Abraço vence Escudo. Escudo vence Laser.</p>
+    <div class="jogo-tela" id="dueloFim" hidden>
+      <h2 id="duFimTitulo"></h2>
+      <p id="duFimTexto"></p>
+      <button class="btn-principal" id="duelarDeNovo">Jogar de novo</button>
+    </div>
+  </section>
+
+  <section class="vista infil" id="vista-infiltrado" aria-label="Cadê o zunk infiltrado?">
+    <div class="barra-topo"><button class="voltar" data-ir="fliper">&lsaquo; Fliperama</button><span class="titulo-jogo">Cadê o zunk?</span></div>
+    <div class="placar">
+      <span>Nível<b id="iNivel">1</b></span>
+      <span>Achados<b id="iAchados">0</b></span>
+      <span>Tempo<b id="iTempo">20</b></span>
+    </div>
+    <div class="campo-caixa">
+      <div class="barra-tempo"><i id="iBarra"></i></div>
+      <div class="campo" id="campo" aria-label="Multidão de rimks com um zunk disfarçado"></div>
+      <div class="aviso-jogo" id="iAviso" role="status"></div>
+    </div>
+    <div class="jogo-tela" id="infilIntro">
+      <h2>Cadê o zunk?</h2>
+      <p>Um zunk se disfarçou de rimk, com bigode falso e tudo! Acha ele no meio da multidão antes do tempo acabar. Se tocar num rimk, perde 2 segundos.</p>
+      <div class="elenco" style="grid-template-columns:1fr;max-width:150px"><figure><svg viewBox="0 -14 100 134" aria-hidden="true"><use href="#zunkfake"/></svg><b>O disfarçado</b><span>Ele fica mais difícil de achar a cada nível.</span></figure></div>
+      <button class="btn-principal" id="comecarInfil">Começar</button>
+    </div>
+    <div class="jogo-tela" id="infilFim" hidden>
+      <h2 id="iFimTitulo"></h2>
+      <div class="fim-pontos" id="iFimAchados">0</div>
+      <p class="fim-rank" id="iFimRank"></p>
+      <p class="fim-rec" id="iFimRec"></p>
+      <button class="btn-principal" id="infilDeNovo">Jogar de novo</button>
+    </div>
+  </section>
+
+  <section class="vista" id="vista-placar" aria-label="Placar do casal">
+    <div class="barra-topo"><button class="voltar" data-ir="fliper">&lsaquo; Fliperama</button><span class="titulo-jogo">Placar do casal</span></div>
+    <div class="pl-corpo" id="plCorpo"></div>
+  </section>
+
+  <section class="vista jardim hora-dia" id="vista-jardim" aria-label="Jardim">
+    <div class="jd-cena">
+      <div class="jd-ceu" id="jCeu">
+        <span class="jd-astro sol" id="jAstro"></span>
+        <span class="jd-chip dia" id="jDiaChip">Dia <b id="jDia">1</b></span>
+        <span class="jd-chip din" id="jDin" aria-label="Moedas"></span>
+        <svg class="jd-morros" viewBox="0 0 460 44" preserveAspectRatio="none" aria-hidden="true">
+          <path d="M0 44 L0 24 Q70 0 150 22 T300 18 T460 16 L460 44Z" fill="#3f8f45"/>
+          <path d="M0 44 L0 34 Q90 16 190 32 T350 30 T460 28 L460 44Z" fill="#357a3b"/>
+        </svg>
+        <svg class="jd-espantalho" viewBox="0 -14 100 134" aria-hidden="true"><use href="#espantalho"/></svg>
+      </div>
+      <div class="jd-campo">
+        <div class="jd-cerca" id="jCercaTopo"></div>
+        <div class="jd-grade" id="jGrade"></div>
+        <div class="jd-cerca" id="jCercaBaixo"></div>
+      </div>
+    </div>
+    <p class="jd-dica" id="jDica"></p>
+    <div class="jd-ferramentas" id="jFerr"></div>
+  </section>
+</div>
+<nav class="abas" aria-label="Seções">
+  <button class="aba ativa" data-vista="ceu" aria-current="page">Céu</button>
+  <button class="aba" data-vista="fliper">Fliperama</button>
+  <button class="aba" data-vista="gatos">Gatinhos</button>
+  <button class="aba" data-vista="jardim">Jardim</button>
+</nav>
+
+<div class="jd-aviso" id="jAviso" role="status"></div>
+<div class="jd-fundo" id="jFundo" hidden>
+  <div class="jd-folha" role="dialog" aria-modal="true" aria-labelledby="jFolhaT">
+    <h3 id="jFolhaT"></h3>
+    <div id="jFolhaC"></div>
+  </div>
+</div>
+
+<div class="fundo-cartao" id="fundoCartao">
+  <div class="cartao" role="dialog" aria-modal="true" aria-labelledby="cartaoTitulo">
+    <h3 id="cartaoTitulo"></h3>
+    <p id="cartaoTexto"></p>
+    <div class="opcoes" id="opcoes" hidden></div>
+    <button class="fechar" id="fechar">Fechar</button>
+  </div>
+</div>
+
+<div class="final" id="final">
+  <h2 id="finalTitulo"></h2>
+  <p id="finalTexto"></p>
+  <div class="assinatura" id="assinatura"></div>
+  <button class="voltar" id="voltar">Voltar ao céu</button>
+</div>
+
+<script>
+/* ============================================================
+   CONFIGURAÇÕES — edite aqui
+   ============================================================ */
+const NOME = "Mat";          // como você o chama (ex.: "Lucas", "meu bem")
+const ASSINATURA = "Lulu"; // ex.: "Sua Ana", "Com amor, Ana"
+const INICIO_DO_NAMORO = "2026-04-17";      // AAAA-MM-DD. Deixe "" para não mostrar o contador.
+const DATA_NOIVADO = "2026-07-28T16:30:00-03:00"; // dia e hora do pedido de casamento. Deixe "" para esconder.
+const DATA_ENCONTRO = "2026-12-03T11:00:00-03:00"; // dia e hora do encontro (-03:00 = horário de Brasília/Pará). Deixe "" para esconder.
+
+const TEXTO_INTRO = "Fiz um céu só pra você, com a constelação de Câncer, a que tava lá no alto quando você me pediu em casamento. Cada estrela guarda uma coisa que eu queria te falar.";
+const TITULO_FINAL = "Você é minha constelação favorita.";
+const TEXTO_FINAL = "Essa é Câncer, a constelação que tava no topo do céu quando você me pediu em casamento, dia 28 de julho de 2026. Do Habblet até aqui, cada estrela que você abriu é só um pedacinho do que eu sinto. O resto eu falo pessoalmente.";
+
+// Cada estrela tem um título e uma mensagem. Pode ter de 3 a 12.
+// x e y são a posição na tela, de 0 a 100 (x = esquerda→direita, y = cima→baixo).
+const ESTRELAS = [
+  { x: 38, y: 14, titulo: "Meu rimk",
+    texto: "Você é meu rimk favorito." },
+  { x: 42, y: 36, titulo: "Pato da vida",
+    texto: "Te amo, pato da vida." },
+  { x: 41, y: 60, titulo: "Uma pergunta",
+    texto: "Casa comigo?",
+    opcoes: ["Sim", "Com certeza"],              // botões de resposta
+    tituloResposta: "Fechado",
+    resposta: "Eu, você, a Diva, o Luke e todas as pizzas do mundo. Fechado. Te amo, Mat!" },
+  { x: 22, y: 76, titulo: "O Horto",
+    texto: "Quero subir o Horto todo dia com você." },
+  { x: 56, y: 47, titulo: "Cupuzinho",
+    texto: "Meu cupuzinho lindo." },
+  { x: 74, y: 84, titulo: "Falta pouco",
+    texto: "",
+    dinamico: () => textoFaltam() },   // calculado na hora em que ele abre
+  { x: 78, y: 58, titulo: "E por fim",
+    texto: "Te amo!!!!!!!!!!!!!!!!!" }
+];
+// ---------- MENSAGEM DO DIA ----------
+// O site mostra uma mensagem por dia, começando na data abaixo, e recomeça do início quando a lista acaba.
+// Use {dias} (dias que faltam pra gente se ver), {juntos} (dias de namoro) e {noivos} (dias de noivado):
+// o número é calculado sozinho. Depois do dia 3/12, as mensagens com {dias} deixam de aparecer.
+const MENSAGENS_A_PARTIR_DE = "2026-09-29";
+
+const MENSAGENS = [
+  "Bom dia, Mat! Faltam {dias} dias pra eu te ver. Tô contando, viu.",
+  "Você é meu rimk favorito. E os zunks que se cuidem kkkk",
+  "Já são {juntos} dias com você e eu ainda dou risada do nada, sem motivo nenhum.",
+  "Lembrei do pneu furado da moto. Na hora foi um sufoco, agora é uma das melhores histórias nossas kkkk",
+  "Quero subir o Horto de moto com você de novo, ver o pôr do sol. Sem pneu furado, por favor kkk",
+  "Faltam {dias} dias. Já tô planejando o rolê: um prato salgado e um bolo, que nem sempre.",
+  "Pizza ou burrito? Me fala qual você quer que eu faça quando a gente se ver.",
+  "Aquele amigo que tem hiperfoco no namorado (eu) kkkk",
+  "A comida paraense tá te esperando: sorvete de açaí da Cairu, um Stupendo do Batistão e Skilhos pra fechar.",
+  "Sabe o que combina com uma noite em casa? Você, eu, um brow sushi e nada pra fazer.",
+  "Quando a gente morar junto, a Diva vai ter que aceitar dividir você comigo. Vai ter que se acostumar kkk",
+  "Dá um beijo na Diva e um carinho no Luke por mim. Aliás, me manda foto dos dois hoje, vai.",
+  "Gatinho laranja, o gatinho preto aqui de Belém tá com saudade.",
+  "Desafio de hoje: me manda foto do bichinho mais fofo que você achar. Sei que você vai amar.",
+  "Bora uma partida de Overwatch? Eu te curo, você destrói tudo de Bastion. Time perfeito.",
+  "Escolhe uma música dos Strokes ou dos Voidz e me manda agora. Vou ouvir junto com você.",
+  "Summer vai ser sempre a nossa música. Dá o play hoje e lembra de mim.",
+  "Quem diria que eu ia te fazer assistir Corrida das Blogueiras comigo kkkk isso que é amor.",
+  "Quebrar aquela barreira foi difícil, mas foi a melhor coisa que eu fiz.",
+  "Um site de habbo pirata, o Habblet, e olha onde a gente foi parar kkkk a vida é engraçada.",
+  "Já são {noivos} dias de noivos! E tudo começou no Habblet.",
+  "Faltam {dias} dias. Aguenta firme, rimk, a missão tá quase completa.",
+  "Nota oficial: os zunks continuam derrotados e os rimks continuam imbatíveis.",
+  "Dá uma olhada no céu hoje à noite. Mesmo sem ver, Câncer tá lá em cima de olho na gente.",
+  "Tô pensando em me mudar pra sua cidade. É muita coisa nova, mas com você eu topo qualquer aventura.",
+  "Prato salgado e bolo: nosso ritual vale mais que restaurante chique.",
+  "Me manda um áudio contando a coisa mais boba que rolou hoje. Quero rir junto.",
+  "Se o dia tiver pesado, lembra que tem um gatinho preto do seu lado, mesmo de longe.",
+  "Pato da vida, hoje eu escolho você de novo. Igual ontem. Igual amanhã.",
+  "Faltam {dias} dias e o primeiro abraço vai demorar muito. Já tô avisando.",
+  "Cupuzinho, bebe água e come direito hoje. Eu cuido de você, mesmo de longe.",
+  "Tem saudade que só passa com abraço. A minha é dessas.",
+  "Já são {juntos} dias juntos e eu quero muito mais."
+];
+
+// Mensagens para datas específicas (formato AAAA-MM-DD). Elas ganham da mensagem comum do dia.
+const MENSAGENS_ESPECIAIS = {
+  "2026-12-03": "É HOJE!!! Depois de tanto contar dia e hora, agora é só abraço, comida boa e nenhum pneu furado."
+};
+
+// Aniversários de mês: o site percebe sozinho quando é dia 17 (namoro) ou dia 28 (noivado).
+const TEXTO_MES_NAMORO = "Dia 17! {n} de namoro. Valeu cada segundo, até o pneu furado.";
+const TEXTO_MES_NOIVADO = "Dia 28! {n} desde que você me pediu em casamento. Eu diria sim de novo, e de novo, e de novo.";
+
+// Linhas da constelação de Câncer. Cada par liga duas estrelas (pelo número da lista, começando em 0).
+// A linha só aparece quando as duas já foram acesas.
+// 0 = ι Cancri, 1 = Asellus Borealis, 2 = Asellus Australis, 3 = Acubens, 4 = Presépio (M44), 5 = Al Tarf, 6 = Tegmine
+const LIGACOES = [[0, 1], [1, 2], [2, 3], [2, 5], [1, 4], [5, 6]];
+/* ============================================================ */
+
+const $ = (id) => document.getElementById(id);
+const ceu = $("ceu");
+const linhas = $("linhas");
+const abertas = [];      // índices na ordem em que foram abertas
+let ultimoFoco = null;
+const respondidas = new Set();
+
+// Textos fixos
+$("tituloIntro").textContent = "Para " + NOME;
+$("textoIntro").textContent = TEXTO_INTRO;
+$("tituloTopo").textContent = "Para " + NOME;
+$("finalTitulo").textContent = TITULO_FINAL;
+$("finalTexto").textContent = TEXTO_FINAL;
+$("assinatura").textContent = ASSINATURA;
+document.title = "Para " + NOME;
+
+// Contadores ao vivo
+const pad = (n) => String(n).padStart(2, "0");
+function partes(ms) {
+  const t = Math.max(0, Math.floor(ms / 1000));
+  return { d: Math.floor(t / 86400), h: Math.floor((t % 86400) / 3600), m: Math.floor((t % 3600) / 60), s: t % 60 };
+}
+function fmt(p) { return p.d + " d " + pad(p.h) + " h " + pad(p.m) + " min " + pad(p.s) + " s"; }
+
+const inicio = INICIO_DO_NAMORO ? new Date(INICIO_DO_NAMORO + "T00:00:00-03:00") : null;
+const noivado = DATA_NOIVADO ? new Date(DATA_NOIVADO) : null;
+const encontro = DATA_ENCONTRO ? new Date(DATA_ENCONTRO) : null;
+const valida = (d) => d && !isNaN(d);
+
+function textoFaltam() {
+  if (!valida(encontro)) return "";
+  const diff = encontro - Date.now();
+  if (diff <= 0) return "É HOJE!!!!!!!!!!!!";
+  const p = partes(diff);
+  return "FALTAM " + p.d + (p.d === 1 ? " DIA" : " DIAS") + " E " + p.h + (p.h === 1 ? " HORA" : " HORAS") + "!!!!!!!!!!!!";
+}
+
+function atualizarContadores() {
+  const agora = Date.now();
+  if (valida(inicio) && agora >= inicio) {
+    $("tJuntos").textContent = fmt(partes(agora - inicio));
+    $("juntos").hidden = false;
+  }
+  if (valida(noivado) && agora >= noivado) {
+    $("tNoivos").textContent = fmt(partes(agora - noivado));
+    $("noivos").hidden = false;
+  }
+  if (valida(encontro)) {
+    $("tFaltam").textContent = encontro - agora > 0 ? fmt(partes(encontro - agora)) : "É hoje!";
+    $("faltam").hidden = false;
+  }
+}
+atualizarContadores();
+setInterval(atualizarContadores, 1000);
+
+// ---------- Mensagem do dia ----------
+const hojeLocal = () => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), d.getDate()); };
+const chaveDia = (d) => d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
+const plural = (n, um, varios) => n + " " + (n === 1 ? um : varios);
+
+function mesesDesde(iso, hoje) {           // iso = "AAAA-MM-DD..."
+  const a = Number(iso.slice(0, 4)), m = Number(iso.slice(5, 7));
+  return (hoje.getFullYear() - a) * 12 + (hoje.getMonth() + 1 - m);
+}
+
+function preencher(txt) {
+  const agora = Date.now();
+  const dias = valida(encontro) ? partes(encontro - agora).d : 0;
+  const juntos = valida(inicio) ? partes(agora - inicio).d : 0;
+  const noivos = valida(noivado) ? partes(agora - noivado).d : 0;
+  return txt.replace(/\{dias\}/g, dias).replace(/\{juntos\}/g, juntos).replace(/\{noivos\}/g, noivos);
+}
+
+function mensagemDeHoje() {
+  const hoje = hojeLocal();
+  if (MENSAGENS_ESPECIAIS[chaveDia(hoje)]) return MENSAGENS_ESPECIAIS[chaveDia(hoje)];
+
+  if (INICIO_DO_NAMORO && hoje.getDate() === Number(INICIO_DO_NAMORO.slice(8, 10))) {
+    const n = mesesDesde(INICIO_DO_NAMORO, hoje);
+    if (n > 0) return TEXTO_MES_NAMORO.replace("{n}", plural(n, "mês", "meses"));
+  }
+  if (DATA_NOIVADO && hoje.getDate() === Number(DATA_NOIVADO.slice(8, 10))) {
+    const n = mesesDesde(DATA_NOIVADO, hoje);
+    if (n > 0) return TEXTO_MES_NOIVADO.replace("{n}", plural(n, "mês", "meses"));
+  }
+
+  const passouEncontro = valida(encontro) && Date.now() >= encontro;
+  const lista = MENSAGENS.filter((m) => !(passouEncontro && m.includes("{dias}")));
+  const [a, m, d] = MENSAGENS_A_PARTIR_DE.split("-").map(Number);
+  const dias = Math.round((hoje - new Date(a, m - 1, d)) / 86400000);
+  const idx = dias > 0 ? dias % lista.length : 0;
+  return preencher(lista[idx]);
+}
+
+const CHAVE_VISTO = "mensagem-do-dia-visto";
+function jaViuHoje() { try { return localStorage.getItem(CHAVE_VISTO) === chaveDia(hojeLocal()); } catch (e) { return false; } }
+function marcarVisto() {
+  try { localStorage.setItem(CHAVE_VISTO, chaveDia(hojeLocal())); } catch (e) {}
+  $("btnHoje").classList.remove("novo");
+}
+if (!jaViuHoje()) $("btnHoje").classList.add("novo");
+
+function abrirMensagem() {
+  ultimoFoco = $("btnHoje");
+  $("opcoes").hidden = true;
+  $("opcoes").innerHTML = "";
+  $("cartaoTitulo").textContent = "Hoje, " + hojeLocal().toLocaleDateString("pt-BR", { day: "numeric", month: "long" });
+  $("cartaoTexto").textContent = mensagemDeHoje();
+  $("fundoCartao").classList.add("visivel");
+  $("fechar").focus();
+  marcarVisto();
+}
+$("btnHoje").addEventListener("click", abrirMensagem);
+
+// Estrelinhas de fundo (decorativas, fixas)
+(function fundo() {
+  const box = $("fundoEstrelas");
+  let seed = 7;
+  const rand = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  for (let i = 0; i < 70; i++) {
+    const s = document.createElement("i");
+    s.style.left = (rand() * 100) + "%";
+    s.style.top = (rand() * 100) + "%";
+    s.style.opacity = (0.25 + rand() * 0.5).toFixed(2);
+    box.appendChild(s);
+  }
+})();
+
+// Estrelas clicáveis
+const botoes = ESTRELAS.map((e, i) => {
+  const b = document.createElement("button");
+  b.className = "estrela";
+  b.style.left = e.x + "%";
+  b.style.top = e.y + "%";
+  b.setAttribute("aria-label", "Estrela " + (i + 1) + " de " + ESTRELAS.length);
+  b.addEventListener("click", () => abrir(i));
+  ceu.appendChild(b);
+  return b;
+});
+
+function atualizarProgresso() {
+  $("progresso").textContent = abertas.length + " de " + ESTRELAS.length + " estrelas acesas";
+}
+atualizarProgresso();
+
+function abrir(i) {
+  ultimoFoco = botoes[i];
+  const e = ESTRELAS[i];
+  if (e.dinamico) e.texto = e.dinamico();
+  const box = $("opcoes");
+  box.innerHTML = "";
+  if (e.opcoes && !respondidas.has(i)) {
+    $("cartaoTitulo").textContent = e.titulo;
+    $("cartaoTexto").textContent = e.texto;
+    e.opcoes.forEach((rotulo) => {
+      const b = document.createElement("button");
+      b.textContent = rotulo;
+      b.addEventListener("click", () => {
+        respondidas.add(i);
+        box.hidden = true;
+        box.innerHTML = "";
+        $("cartaoTitulo").textContent = e.tituloResposta || e.titulo;
+        $("cartaoTexto").textContent = e.resposta || "";
+        $("fechar").focus();
+      });
+      box.appendChild(b);
+    });
+    box.hidden = false;
+  } else {
+    box.hidden = true;
+    $("cartaoTitulo").textContent = e.opcoes ? (e.tituloResposta || e.titulo) : e.titulo;
+    $("cartaoTexto").textContent = e.opcoes ? (e.resposta || "") : e.texto;
+  }
+  $("fundoCartao").classList.add("visivel");
+  (box.hidden ? $("fechar") : box.firstChild).focus();
+
+  if (!abertas.includes(i)) {
+    abertas.push(i);
+    botoes[i].classList.add("aberta");
+    LIGACOES.forEach(([a, b]) => {
+      if ((a === i && abertas.includes(b)) || (b === i && abertas.includes(a))) ligar(a, b);
+    });
+    atualizarProgresso();
+  }
+}
+
+function ligar(a, b) {
+  const l = document.createElementNS("http://www.w3.org/2000/svg", "line");
+  l.setAttribute("x1", ESTRELAS[a].x); l.setAttribute("y1", ESTRELAS[a].y);
+  l.setAttribute("x2", ESTRELAS[b].x); l.setAttribute("y2", ESTRELAS[b].y);
+  l.setAttribute("pathLength", "1");
+  linhas.appendChild(l);
+}
+
+function fechar() {
+  $("fundoCartao").classList.remove("visivel");
+  if (abertas.length === ESTRELAS.length && !$("final").dataset.mostrado) {
+    $("final").dataset.mostrado = "1";
+    setTimeout(() => {
+      $("final").classList.add("visivel");
+      $("voltar").focus();
+    }, 900);
+  } else if (ultimoFoco) {
+    ultimoFoco.focus();
+  }
+}
+
+$("fechar").addEventListener("click", fechar);
+$("fundoCartao").addEventListener("click", (ev) => { if (ev.target === $("fundoCartao")) fechar(); });
+document.addEventListener("keydown", (ev) => {
+  if (ev.key === "Escape" && $("fundoCartao").classList.contains("visivel")) fechar();
+});
+$("voltar").addEventListener("click", () => {
+  $("final").classList.remove("visivel");
+  if (ultimoFoco) ultimoFoco.focus();
+});
+$("comecar").addEventListener("click", () => {
+  $("intro").classList.add("saindo");
+  setTimeout(() => botoes[0] && botoes[0].focus({ preventScroll: true }), 300);
+});
+
+/* ============================================================
+   NAVEGAÇÃO ENTRE AS TELAS
+   ============================================================ */
+const vistas = {
+  ceu: $("vista-ceu"), fliper: $("vista-fliper"), jogo: $("vista-jogo"), corrida: $("vista-corrida"),
+  duelo: $("vista-duelo"), infiltrado: $("vista-infiltrado"), gatos: $("vista-gatos"),
+  placar: $("vista-placar"), jardim: $("vista-jardim")
+};
+const SUBJOGOS = ["jogo", "corrida", "duelo", "infiltrado", "placar"];
+const abas = document.querySelectorAll(".aba");
+function irPara(nome) {
+  if (nome !== "jogo") {
+    pararJogo();
+    $("jogoFim").hidden = true;
+    $("jogoIntro").hidden = false;
+  }
+  if (nome !== "corrida") pararCorrida(true);
+  if (nome !== "infiltrado") pararInfiltrado(true);
+  if (nome !== "duelo") reiniciarDuelo();
+  Object.keys(vistas).forEach((k) => vistas[k].classList.toggle("ativa", k === nome));
+  const aba = SUBJOGOS.includes(nome) ? "fliper" : nome;
+  abas.forEach((b) => {
+    const on = b.dataset.vista === aba;
+    b.classList.toggle("ativa", on);
+    if (on) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current");
+  });
+  if (nome === "fliper") atualizarRecordes();
+  if (nome === "corrida") atualizarHudCorrida();
+  if (nome === "placar") renderPlacar();
+  if (nome === "jardim") jAoAbrir();
+}
+abas.forEach((b) => b.addEventListener("click", () => irPara(b.dataset.vista)));
+
+const guardar = (k, v) => { try { localStorage.setItem(k, String(v)); } catch (e) {} };
+const ler = (k) => { try { return Number(localStorage.getItem(k)) || 0; } catch (e) { return 0; } };
+const sortear = (lista) => lista[Math.floor(Math.random() * lista.length)];
+
+/* ============================================================
+   JOGO: RIMKS VS ZUNKS
+   ============================================================ */
+const DURACAO = 45;          // segundos de partida
+const VIDAS = 3;             // quantas vezes ele pode bater num rimk
+const SPR = (t) => '<svg viewBox="0 -14 100 134" aria-hidden="true"><use href="#' + t + '"/></svg>';
+const arena = $("arena");
+const buracos = [];
+const jogo = { rodando: false, boss: null };
+
+for (let i = 0; i < 9; i++) {
+  const h = document.createElement("button");
+  h.type = "button";
+  h.className = "buraco";
+  h.setAttribute("aria-label", "Portal " + (i + 1));
+  h.innerHTML = '<span class="portal"></span><span class="cena"></span><span class="lip"></span>';
+  h.cena = h.querySelector(".cena");
+  h.ocupado = null; h.bicho = null; h.timer = null; h.timer2 = null;
+  h.addEventListener("pointerdown", (e) => { e.preventDefault(); bater(h); });
+  h.addEventListener("click", (e) => { if (e.detail === 0) bater(h); });   // teclado
+  arena.appendChild(h);
+  buracos.push(h);
+}
+
+const elVidas = $("jVidas");
+for (let i = 0; i < VIDAS; i++) {
+  const s = document.createElement("span");
+  s.innerHTML = SPR("rimk");
+  elVidas.appendChild(s);
+}
+
+function atualizarPlacar() {
+  $("jPontos").textContent = jogo.pontos || 0;
+  $("jTempo").textContent = jogo.tempo === undefined ? DURACAO : Math.max(0, jogo.tempo);
+  [...elVidas.children].forEach((s, i) => s.classList.toggle("perdida", i >= (jogo.vidas === undefined ? VIDAS : jogo.vidas)));
+}
+
+function limparBuraco(h) {
+  clearTimeout(h.timer); clearTimeout(h.timer2);
+  h.cena.innerHTML = "";
+  h.querySelectorAll(".barra").forEach((x) => x.remove());
+  h.ocupado = null; h.bicho = null;
+}
+
+let avisoT = null;
+function aviso(txt) {
+  const a = $("jogoAviso");
+  a.textContent = txt;
+  a.classList.add("visivel");
+  clearTimeout(avisoT);
+  avisoT = setTimeout(() => a.classList.remove("visivel"), 1700);
+}
+
+function flutuar(h, txt, cls) {
+  const f = document.createElement("span");
+  f.className = "flutua " + cls;
+  f.textContent = txt;
+  h.appendChild(f);
+  setTimeout(() => f.remove(), 800);
+}
+
+const fracao = () => Math.min(1, Math.max(0, (DURACAO - jogo.tempo) / DURACAO));
+
+function iniciarJogo() {
+  pararJogo();
+  Object.assign(jogo, { rodando: true, pontos: 0, vidas: VIDAS, tempo: DURACAO, proxBoss: 15, boss: null, ultimoSupremo: performance.now() });
+  $("jogoIntro").hidden = true;
+  $("jogoFim").hidden = true;
+  atualizarPlacar();
+  jogo.tick = setInterval(() => {
+    jogo.tempo--;
+    atualizarPlacar();
+    if (jogo.tempo <= 0) fimDeJogo("tempo");
+  }, 1000);
+  jogo.spawn = setTimeout(spawn, 500);
+}
+
+function pararJogo() {
+  jogo.rodando = false;
+  clearInterval(jogo.tick);
+  clearTimeout(jogo.spawn);
+  buracos.forEach(limparBuraco);
+  jogo.boss = null;
+}
+
+function sortearTipo() {
+  const r = Math.random(), agora = performance.now();
+  if (agora - jogo.ultimoSupremo > 16000 && r < 0.08) { jogo.ultimoSupremo = agora; return "supremo"; }
+  return r < 0.30 ? "rimk" : "zunk";
+}
+
+function spawn() {
+  if (!jogo.rodando) return;
+  verificarBoss();
+  const livres = buracos.filter((h) => !h.ocupado);
+  if (livres.length) mostrar(sortear(livres), sortearTipo());
+  const f = fracao();
+  jogo.spawn = setTimeout(spawn, (900 - 420 * f) * (0.75 + Math.random() * 0.5));
+}
+
+function mostrar(h, tipo, dur) {
+  const classe = tipo === "supremo" ? "zeprikito" : tipo === "boss" ? "matmallo" : tipo;
+  const el = document.createElement("div");
+  el.className = "bicho " + classe;
+  el.innerHTML = SPR(classe);
+  h.cena.appendChild(el);
+  h.bicho = el; h.ocupado = tipo;
+  requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add("sobe")));
+  const f = fracao();
+  h.timer = setTimeout(() => sair(h), dur || (tipo === "supremo" ? 1500 : 1250 - 500 * f));
+}
+
+function remover(h, ms) {
+  clearTimeout(h.timer);
+  const el = h.bicho;
+  h.ocupado = "saindo";
+  h.timer2 = setTimeout(() => { if (el) el.remove(); h.bicho = null; h.ocupado = null; }, ms);
+}
+
+function sair(h) {
+  if (!h.bicho || h.ocupado === "saindo") return;
+  if (h.ocupado === "boss") {
+    jogo.boss = null;
+    h.querySelectorAll(".barra").forEach((x) => x.remove());
+    aviso("Matmallo fugiu!");
+  }
+  h.bicho.classList.remove("sobe");
+  remover(h, 260);
+}
+
+function derrotar(h) {
+  if (h.ocupado === "boss") { jogo.boss = null; h.querySelectorAll(".barra").forEach((x) => x.remove()); }
+  h.bicho.classList.add("puf");
+  remover(h, 320);
+}
+
+function bater(h) {
+  if (!jogo.rodando || !h.ocupado || h.ocupado === "saindo") return;
+  const tipo = h.ocupado;
+  if (tipo === "zunk") {
+    jogo.pontos++;
+    flutuar(h, "+1", "ok");
+    derrotar(h);
+  } else if (tipo === "rimk") {
+    flutuar(h, "Ai!", "erro");
+    h.bicho.classList.add("triste");
+    remover(h, 300);
+    perderVida();
+  } else if (tipo === "supremo") {
+    poderSupremo(h);
+  } else if (tipo === "boss") {
+    golpeBoss(h, 1);
+  }
+  atualizarPlacar();
+  verificarBoss();
+}
+
+function perderVida() {
+  jogo.vidas--;
+  arena.classList.remove("tremer");
+  void arena.offsetWidth;
+  arena.classList.add("tremer");
+  atualizarPlacar();
+  if (jogo.vidas <= 0) fimDeJogo("vidas");
+}
+
+function poderSupremo(h) {
+  let n = 0;
+  buracos.forEach((x) => {
+    if (x.ocupado === "zunk") { flutuar(x, "+1", "ok"); derrotar(x); n++; }
+    else if (x.ocupado === "boss") golpeBoss(x, 3);
+  });
+  h.bicho.classList.add("puf");
+  remover(h, 320);
+  jogo.pontos += 5 + n;
+  arena.classList.add("flash");
+  setTimeout(() => arena.classList.remove("flash"), 450);
+  aviso("PODER SUPREMO! +" + (5 + n));
+}
+
+function verificarBoss() {
+  if (!jogo.rodando || jogo.boss || jogo.pontos < jogo.proxBoss) return;
+  const livres = buracos.filter((h) => !h.ocupado);
+  if (!livres.length) return;
+  const h = livres.includes(buracos[4]) ? buracos[4] : sortear(livres);
+  jogo.proxBoss += 25;
+  jogo.boss = { hp: 6, max: 6 };
+  mostrar(h, "boss", 7500);
+  const barra = document.createElement("span");
+  barra.className = "barra";
+  barra.innerHTML = "<i></i>";
+  h.appendChild(barra);
+  aviso("O Matmallo apareceu! Bate nele!");
+}
+
+function golpeBoss(h, dano) {
+  if (!jogo.boss) return;
+  jogo.boss.hp -= dano;
+  const el = h.bicho;
+  const barra = h.querySelector(".barra i");
+  if (barra) barra.style.width = Math.max(0, jogo.boss.hp / jogo.boss.max * 100) + "%";
+  if (jogo.boss.hp <= 0) {
+    jogo.pontos += 10;
+    jogo.tempo += 5;
+    flutuar(h, "+10", "ok");
+    aviso("Matmallo derrotado! +10 pontos e +5 segundos");
+    derrotar(h);
+  } else if (el) {
+    el.classList.add("treme");
+    setTimeout(() => el.classList.remove("treme"), 110);
+  }
+}
+
+function fimDeJogo(motivo) {
+  if (!jogo.rodando) return;
+  const p = jogo.pontos;
+  pararJogo();
+  const rank = p >= 45 ? "Digno de ZéPrikito" : p >= 25 ? "Rimk de elite" : p >= 10 ? "Rimk guerreiro" : "Rimk recruta";
+  const recorde = ler("rimks-zunks-recorde");
+  $("fimTitulo").textContent = motivo === "vidas" ? "Você bateu demais nos rimks!" : "Acabou o tempo!";
+  $("fimPontos").textContent = p;
+  $("fimRank").textContent = rank;
+  if (p > recorde) {
+    guardar("rimks-zunks-recorde", p);
+    $("fimRec").textContent = recorde > 0 ? "Novo recorde! O anterior era " + recorde + "." : "Esse é o seu primeiro recorde!";
+  } else {
+    $("fimRec").textContent = "Seu recorde: " + recorde;
+  }
+  $("jogoFim").hidden = false;
+  $("jogarDeNovo").focus();
+}
+
+$("jogar").addEventListener("click", iniciarJogo);
+$("jogarDeNovo").addEventListener("click", iniciarJogo);
+atualizarPlacar();
+
+/* ============================================================
+   CANTINHO DOS GATINHOS
+   ============================================================ */
+function gatoSVG() {
+  const olho = (x) => '<g transform="translate(' + x + ',90)"><g class="aberto"><circle r="12" fill="var(--iris)"/>' +
+    '<ellipse class="pupila" rx="4" ry="9" fill="#111"/><circle cx="-3.5" cy="-4" r="2.6" fill="#fff"/></g>' +
+    '<path class="fechado" d="M-11 3 Q0 -10 11 3" fill="none" stroke="#111" stroke-width="3.5" stroke-linecap="round"/></g>';
+  const linha = 'stroke="var(--bigode)" stroke-width="1.6" stroke-linecap="round"';
+  return '<svg viewBox="0 0 200 222" aria-hidden="true">' +
+    '<g class="rabo"><path d="M146 198 C192 202 198 150 172 126" fill="none" stroke="var(--pelo)" stroke-width="18" stroke-linecap="round"/></g>' +
+    '<ellipse cx="100" cy="162" rx="54" ry="54" fill="var(--pelo)" stroke="var(--contorno)" stroke-width="2"/>' +
+    '<ellipse cx="100" cy="174" rx="30" ry="34" fill="var(--barriga)"/>' +
+    '<ellipse cx="78" cy="211" rx="17" ry="9" fill="var(--barriga)" stroke="var(--contorno)" stroke-width="2"/>' +
+    '<ellipse cx="122" cy="211" rx="17" ry="9" fill="var(--barriga)" stroke="var(--contorno)" stroke-width="2"/>' +
+    '<g class="cabeca">' +
+      '<path d="M52 68 L46 18 L94 48Z" fill="var(--pelo)" stroke="var(--contorno)" stroke-width="2" stroke-linejoin="round"/>' +
+      '<path d="M148 68 L154 18 L106 48Z" fill="var(--pelo)" stroke="var(--contorno)" stroke-width="2" stroke-linejoin="round"/>' +
+      '<path d="M58 56 L55 32 L80 48Z" fill="#f4a3b8"/><path d="M142 56 L145 32 L120 48Z" fill="#f4a3b8"/>' +
+      '<circle cx="100" cy="94" r="54" fill="var(--pelo)" stroke="var(--contorno)" stroke-width="2"/>' +
+      '<ellipse cx="100" cy="113" rx="25" ry="17" fill="var(--barriga)"/>' +
+      olho(75) + olho(125) +
+      '<circle class="blush" cx="58" cy="110" r="9" fill="#ff8fab"/><circle class="blush" cx="142" cy="110" r="9" fill="#ff8fab"/>' +
+      '<path d="M94 101 L106 101 L100 108Z" fill="#f28ba8"/>' +
+      '<g class="boca"><path d="M100 108 Q95 117 87 113" fill="none" stroke="#111" stroke-width="2.2" stroke-linecap="round"/>' +
+      '<path d="M100 108 Q105 117 113 113" fill="none" stroke="#111" stroke-width="2.2" stroke-linecap="round"/></g>' +
+      '<path d="M70 108 L30 101" ' + linha + '/><path d="M70 114 L30 120" ' + linha + '/>' +
+      '<path d="M130 108 L170 101" ' + linha + '/><path d="M130 114 L170 120" ' + linha + '/>' +
+    '</g></svg>';
+}
+
+const palco = $("palco");
+const gatos = [...palco.querySelectorAll(".gato")];
+gatos.forEach((g) => { g.innerHTML = gatoSVG(); });
+
+let ferr = "carinho";
+const stats = { carinhos: ler("gatos-carinhos"), petiscos: ler("gatos-petiscos") };
+function mostrarStats() { $("nCarinhos").textContent = stats.carinhos; $("nPetiscos").textContent = stats.petiscos; }
+mostrarStats();
+
+const DICAS = {
+  carinho: "Passa o dedo nos gatinhos.",
+  petisco: "Toca num gatinho pra dar um petisco.",
+  bolinha: "Joga a bolinha! Eles brincam sozinhos. Toca de novo em Bolinha pra guardar."
+};
+
+document.querySelectorAll(".ferr[data-f]").forEach((b) => b.addEventListener("click", () => {
+  const antes = ferr;
+  ferr = b.dataset.f;
+  document.querySelectorAll(".ferr[data-f]").forEach((x) => x.setAttribute("aria-pressed", x === b ? "true" : "false"));
+  $("dicaGatos").textContent = DICAS[ferr];
+  if (ferr === "bolinha") {
+    if (antes === "bolinha" && bola.on) { bola.on = false; bolaEl.hidden = true; desolhar(); }
+    else if (!bola.on) mostrarBola(palco.clientWidth / 2, 30);
+  }
+}));
+
+const noPalco = (x, y) => { const r = palco.getBoundingClientRect(); return { x: x - r.left, y: y - r.top }; };
+
+function falar(g, txt) {
+  const cx = g.parentElement;
+  cx.querySelectorAll(".balao").forEach((b) => b.remove());
+  const b = document.createElement("span");
+  b.className = "balao";
+  b.textContent = txt;
+  cx.appendChild(b);
+  setTimeout(() => b.remove(), 1150);
+}
+
+function coracao(x, y) {
+  const p = noPalco(x, y);
+  const c = document.createElement("span");
+  c.className = "coracao";
+  c.textContent = "\u2665";
+  c.style.left = (p.x + (Math.random() * 30 - 15)) + "px";
+  c.style.top = (p.y + (Math.random() * 16 - 8)) + "px";
+  palco.appendChild(c);
+  setTimeout(() => c.remove(), 1000);
+}
+
+function afagar(g, x, y) {
+  g.classList.add("feliz");
+  clearTimeout(g._feliz);
+  g._feliz = setTimeout(() => g.classList.remove("feliz"), 1400);
+  coracao(x, y);
+  stats.carinhos++;
+  mexer(gatos.indexOf(g), "car", 4);
+  guardar("gatos-carinhos", stats.carinhos);
+  mostrarStats();
+  if (stats.carinhos % 8 === 0) falar(g, sortear(["prrrr", "prrr...", "ronrom"]));
+}
+
+function pular(g) {
+  if (g._pulando) return;
+  g._pulando = true;
+  g.classList.add("pula");
+  if (Math.random() < 0.5) falar(g, sortear(["miau!", "mrrrau", "miaaau"]));
+  setTimeout(() => { g.classList.remove("pula"); g._pulando = false; }, 700);
+}
+
+const PEIXE = '<svg viewBox="0 0 48 28" aria-hidden="true"><ellipse cx="20" cy="14" rx="16" ry="9" fill="#7fd3e8"/>' +
+  '<path d="M34 14 L46 4 L46 24Z" fill="#5bb8d1"/><circle cx="11" cy="11.5" r="2" fill="#0f0d2a"/></svg>';
+
+function darPetisco(g) {
+  if (g._comendo) return;
+  if (cats[gatos.indexOf(g)].s.fome > 92) { falar(g, "tô cheio!"); return; }
+  g._comendo = true;
+  const peixe = document.createElement("div");
+  peixe.className = "petisco";
+  peixe.innerHTML = PEIXE;
+  palco.appendChild(peixe);
+  const pr = palco.getBoundingClientRect(), gr = g.getBoundingClientRect();
+  peixe.style.left = (gr.left - pr.left + gr.width / 2) + "px";
+  const destino = gr.top - pr.top + gr.height * 0.55;
+  const anim = peixe.animate(
+    [{ transform: "translate(-50%, -30px) rotate(-25deg)" }, { transform: "translate(-50%, " + destino + "px) rotate(15deg)" }],
+    { duration: 600, easing: "ease-in", fill: "forwards" }
+  );
+  anim.onfinish = () => {
+    peixe.remove();
+    g.classList.add("mastiga", "feliz");
+    falar(g, "nhac nhac");
+    stats.petiscos++;
+    mexer(gatos.indexOf(g), "fome", 32); mexer(gatos.indexOf(g), "car", 2);
+    guardar("gatos-petiscos", stats.petiscos);
+    mostrarStats();
+    setTimeout(() => { g.classList.remove("mastiga", "feliz"); g._comendo = false; }, 1600);
+  };
+}
+
+// Os olhos seguem o dedo (ou o mouse)
+function olhar(x, y) {
+  gatos.forEach((g) => {
+    const r = g.getBoundingClientRect();
+    const dx = x - (r.left + r.width / 2), dy = y - (r.top + r.height * 0.42);
+    const d = Math.hypot(dx, dy) || 1, k = Math.min(1, d / 120);
+    g.querySelectorAll(".pupila").forEach((p) => { p.style.transform = "translate(" + (dx / d * 4 * k) + "px," + (dy / d * 3 * k) + "px)"; });
+  });
+}
+function desolhar() { gatos.forEach((g) => g.querySelectorAll(".pupila").forEach((p) => { p.style.transform = ""; })); }
+
+gatos.forEach((g) => {
+  let ult = null, acum = 0;
+  g.addEventListener("pointerdown", (e) => {
+    e.preventDefault();
+    if (ferr === "carinho") { ult = { x: e.clientX, y: e.clientY }; acum = 0; g.classList.add("afaga"); afagar(g, e.clientX, e.clientY); }
+    else if (ferr === "petisco") darPetisco(g);
+  });
+  g.addEventListener("pointermove", (e) => {
+    if (ferr !== "carinho") return;
+    if (!(e.buttons > 0 || e.pointerType === "mouse")) return;
+    if (!ult) { ult = { x: e.clientX, y: e.clientY }; return; }
+    acum += Math.hypot(e.clientX - ult.x, e.clientY - ult.y);
+    ult = { x: e.clientX, y: e.clientY };
+    if (acum >= 34) { acum = 0; afagar(g, e.clientX, e.clientY); }
+  });
+  const soltar = () => { ult = null; g.classList.remove("afaga"); };
+  ["pointerup", "pointerleave", "pointercancel"].forEach((ev) => g.addEventListener(ev, soltar));
+  g.addEventListener("keydown", (e) => {
+    if (e.key !== "Enter" && e.key !== " ") return;
+    e.preventDefault();
+    const r = g.getBoundingClientRect();
+    if (ferr === "carinho") afagar(g, r.left + r.width / 2, r.top + r.height / 2);
+    else if (ferr === "petisco") darPetisco(g);
+    else pular(g);
+  });
+});
+
+/* ---- Bolinha solta, com física ---- */
+const bolaEl = $("bolinha");
+const bola = { on: false, x: 0, y: 0, vx: 0, vy: 0, rot: 0, r: 19, presa: false, parada: 0 };
+function desenharBola() { bolaEl.style.transform = "translate(" + bola.x + "px," + bola.y + "px) translate(-50%,-50%) rotate(" + bola.rot + "rad)"; }
+function mostrarBola(x, y) { bola.on = true; bolaEl.hidden = false; Object.assign(bola, { x, y, vx: 0, vy: 0, parada: 0 }); desenharBola(); }
+
+let pv = null;
+bolaEl.addEventListener("pointerdown", (e) => {
+  e.preventDefault(); e.stopPropagation();
+  bola.presa = true; bolaEl.setPointerCapture(e.pointerId); bolaEl.style.cursor = "grabbing";
+  pv = { x: e.clientX, y: e.clientY, t: performance.now() }; bola.vx = bola.vy = 0;
+});
+bolaEl.addEventListener("pointermove", (e) => {
+  if (!bola.presa) return;
+  const agora = performance.now(), dt = Math.max(1, agora - pv.t) / 1000, p = noPalco(e.clientX, e.clientY);
+  bola.vx = bola.vx * .5 + (e.clientX - pv.x) / dt * .5;
+  bola.vy = bola.vy * .5 + (e.clientY - pv.y) / dt * .5;
+  pv = { x: e.clientX, y: e.clientY, t: agora };
+  bola.x = Math.max(bola.r, Math.min(palco.clientWidth - bola.r, p.x));
+  bola.y = Math.max(bola.r, p.y);
+  desenharBola();
+});
+function largarBola() {
+  if (!bola.presa) return;
+  bola.presa = false; bolaEl.style.cursor = "";
+  if (performance.now() - pv.t > 90) bola.vx = bola.vy = 0;
+  const v = Math.hypot(bola.vx, bola.vy);
+  if (v > 1800) { bola.vx *= 1800 / v; bola.vy *= 1800 / v; }
+}
+["pointerup", "pointercancel"].forEach((ev) => bolaEl.addEventListener(ev, largarBola));
+
+function brincar(pr, parada) {
+  if (palco.classList.contains("dorme") || bola.presa) return;
+  const agora = performance.now();
+  gatos.forEach((g, i) => {
+    const c = cats[i];
+    if (c.s.en < 12 || g._pulando) return;
+    const gr = g.getBoundingClientRect();
+    const cx = gr.left - pr.left + gr.width / 2, cy = gr.top - pr.top + gr.height * .62;
+    if (Math.hypot(bola.x - cx, bola.y - cy) < gr.width * .5 && agora > (c.cd || 0)) {
+      c.cd = agora + 1800;
+      pular(g);
+      bola.vx = (bola.x < pr.width / 2 ? 1 : -1) * rnd(180, 420);
+      bola.vy = -rnd(350, 650);
+      mexer(i, "div", 4); mexer(i, "en", -3);
+    }
+  });
+  if (parada && bola.parada > 3) {      // bolinha parada: um gatinho cutuca pra perto dele
+    const cand = gatos.map((g, i) => i).filter((i) => cats[i].s.en > 12 && cats[i].s.div < 90);
+    if (!cand.length) return;
+    const g = gatos[sortear(cand)], gr = g.getBoundingClientRect();
+    bola.parada = 0; pular(g);
+    bola.vx = (gr.left - pr.left + gr.width / 2 > bola.x ? 1 : -1) * rnd(170, 260);
+    bola.vy = -rnd(220, 340);
+  }
+}
+
+let ultT = 0;
+function quadro(t) {
+  requestAnimationFrame(quadro);
+  const dt = Math.min(.033, (t - ultT) / 1000 || 0); ultT = t;
+  if (!bola.on || !vistas.gatos.classList.contains("ativa")) return;
+  const pr = palco.getBoundingClientRect(), W = pr.width;
+  const piso = gatos[0].getBoundingClientRect().bottom - pr.top - 6 - bola.r;
+  if (!bola.presa) {
+    bola.vy += 1500 * dt; bola.x += bola.vx * dt; bola.y += bola.vy * dt;
+    bola.rot += bola.vx * dt / bola.r;
+    if (bola.x < bola.r) { bola.x = bola.r; bola.vx = Math.abs(bola.vx) * .75; }
+    if (bola.x > W - bola.r) { bola.x = W - bola.r; bola.vx = -Math.abs(bola.vx) * .75; }
+    if (bola.y < bola.r) { bola.y = bola.r; bola.vy = Math.abs(bola.vy) * .75; }
+    if (bola.y >= piso) {
+      bola.y = piso;
+      bola.vy = Math.abs(bola.vy) > 90 ? -bola.vy * .6 : 0;
+      bola.vx *= Math.pow(.4, dt);
+      if (Math.abs(bola.vx) < 6) bola.vx = 0;
+    }
+  }
+  const parada = !bola.presa && bola.y >= piso && !bola.vx && !bola.vy;
+  bola.parada = parada ? bola.parada + dt : 0;
+  desenharBola();
+  olhar(pr.left + bola.x, pr.top + bola.y);   // os olhos acompanham a bolinha
+  brincar(pr, parada);
+}
+requestAnimationFrame(quadro);
+
+palco.addEventListener("pointerdown", (e) => { if (ferr === "bolinha") { const p = noPalco(e.clientX, e.clientY); mostrarBola(p.x, p.y); } });
+palco.addEventListener("pointermove", (e) => { if (!bola.on) olhar(e.clientX, e.clientY); });
+palco.addEventListener("pointerleave", () => { if (!bola.on) desolhar(); });
+
+$("btnJuntos").addEventListener("click", () => {
+  const on = palco.classList.toggle("juntos");
+  $("btnJuntos").setAttribute("aria-pressed", on ? "true" : "false");
+  if (on) {
+    const r = palco.getBoundingClientRect();
+    [0, 1, 2].forEach((i) => setTimeout(() => coracao(r.left + r.width / 2, r.top + r.height * 0.4), i * 250));
+    setTimeout(() => gatos.forEach((g) => falar(g, "prrr")), 500);
+  }
+});
+$("btnSono").addEventListener("click", () => {
+  const on = palco.classList.toggle("dorme");
+  $("btnSono").setAttribute("aria-pressed", on ? "true" : "false");
+});
+
+/* ---- Necessidades dos gatinhos (as barras descem com o tempo) ---- */
+// taxa = quanto a barra cai por hora
+const NEC = [
+  { k: "fome", n: "Fome",     cor: "var(--ouro)",     taxa: 9,  msg: "tô com fome..." },
+  { k: "div",  n: "Diversão", cor: "var(--rosa)",     taxa: 11, msg: "brinca comigo!" },
+  { k: "en",   n: "Energia",  cor: "#7fd3e8",         taxa: 6,  msg: "tô com sono..." },
+  { k: "car",  n: "Carinho",  cor: "var(--lavanda)",  taxa: 8,  msg: "cadê meu carinho?" }
+];
+const CHAVE_ST = "gatos-estado";
+const cats = gatos.map((g, i) => ({ g, nome: ["Mat", "Lulu"][i], s: { fome: 80, div: 75, en: 85, car: 70 } }));
+
+(function carregarEstado() {          // enquanto o site esteve fechado, as barras também desceram (mais devagar)
+  try {
+    const d = JSON.parse(localStorage.getItem(CHAVE_ST));
+    if (!d) return;
+    const h = Math.min(12, Math.max(0, (Date.now() - d.t) / 3.6e6));
+    cats.forEach((c, i) => NEC.forEach((n) => {
+      const v = d.c[i] && d.c[i][n.k];
+      if (typeof v === "number") c.s[n.k] = Math.max(0, v - n.taxa * h * .7);
+    }));
+  } catch (e) {}
+})();
+function salvarEstado() { try { localStorage.setItem(CHAVE_ST, JSON.stringify({ t: Date.now(), c: cats.map((c) => c.s) })); } catch (e) {} }
+
+cats.forEach((c) => {
+  const d = document.createElement("div");
+  d.className = "st-gato";
+  d.innerHTML = "<b>" + c.nome + "</b>" + NEC.map((n) =>
+    '<div class="st"><span>' + n.n + '</span><i role="progressbar" aria-label="' + c.nome + ", " + n.n +
+    '" aria-valuemin="0" aria-valuemax="100"><b style="background:' + n.cor + '"></b></i></div>').join("");
+  $("statusGatos").appendChild(d);
+  c.el = d.querySelectorAll(".st i");
+});
+
+function desenharStatus() {
+  cats.forEach((c) => {
+    let menor = 100;
+    NEC.forEach((n, j) => {
+      const v = c.s[n.k], el = c.el[j];
+      el.firstChild.style.width = v + "%";
+      el.setAttribute("aria-valuenow", Math.round(v));
+      el.classList.toggle("baixo", v < 25);
+      menor = Math.min(menor, v);
+    });
+    c.g.classList.toggle("triste", menor < 25);
+  });
+}
+function mexer(i, k, d) { const s = cats[i].s; s[k] = Math.max(0, Math.min(100, s[k] + d)); desenharStatus(); }
+
+let ticks = 0;
+setInterval(() => {
+  const dorme = palco.classList.contains("dorme"), juntos = palco.classList.contains("juntos");
+  cats.forEach((c) => NEC.forEach((n) => {
+    let d = -n.taxa / 3600 * (dorme && n.k !== "en" ? .5 : 1);
+    if (n.k === "en" && dorme) d = .25;                // dormindo, a energia volta (devagar)
+    if (juntos && n.k === "car") d += .12;             // juntinhos, o carinho sobe
+    c.s[n.k] = Math.max(0, Math.min(100, c.s[n.k] + d));
+  }));
+  desenharStatus();
+  if (dorme && cats.every((c) => c.s.en >= 99)) { $("btnSono").click(); cats.forEach((c) => falar(c.g, "acordei!")); }
+  if (++ticks % 5 === 0) salvarEstado();
+  if (ticks % 25 === 0 && !dorme && vistas.gatos.classList.contains("ativa")) {   // reclamam quando precisam de algo
+    let pior = null;
+    cats.forEach((c) => NEC.forEach((n) => { if (c.s[n.k] < 25 && (!pior || c.s[n.k] < pior.v)) pior = { c, n, v: c.s[n.k] }; }));
+    if (pior) falar(pior.c.g, pior.n.msg);
+  }
+}, 1000);
+document.addEventListener("visibilitychange", () => { if (document.hidden) salvarEstado(); });
+window.addEventListener("pagehide", salvarEstado);
+desenharStatus();
+
+/* ============================================================
+   FLIPERAMA: menu, recordes e voltar
+   ============================================================ */
+const rnd = (a, b) => a + Math.random() * (b - a);
+function atualizarRecordes() {
+  const r = (k, txt) => { const n = ler(k); return n > 0 ? txt.replace("{n}", n) : "Ainda sem recorde"; };
+  $("recZunks").textContent = r("rimks-zunks-recorde", "Recorde: {n}");
+  $("recCorrida").textContent = r("corrida-recorde", "Recorde: {n}");
+  $("recDuelo").textContent = ler("duelo-vitorias") > 0 ? "Vitórias: " + ler("duelo-vitorias") : "Ainda sem vitórias";
+  $("recInfil").textContent = r("infiltrado-recorde", "Recorde: {n}");
+}
+atualizarRecordes();
+document.querySelectorAll("[data-ir]").forEach((b) => b.addEventListener("click", () => irPara(b.dataset.ir)));
+
+// Transforma um personagem (símbolo SVG) em imagem pra desenhar no canvas
+function imagemDe(id) {
+  const el = document.getElementById(id);
+  const svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -14 100 134" width="200" height="268">' + el.outerHTML + "</svg>";
+  const im = new Image();
+  im.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
+  return im;
+}
+
+/* ============================================================
+   JOGO: CORRIDA NO HORTO
+   ============================================================ */
+const PISTA = { W: 360, H: 420, estrada: 348, chao: 372, px: 70 };
+const canvas = $("corridaCanvas");
+const ctx = canvas.getContext("2d");
+const DPR = 2;
+canvas.width = PISTA.W * DPR;
+canvas.height = PISTA.H * DPR;
+const imgEle = imagemDe("rimkEle"), imgEla = imagemDe("rimkEla");
+const imgZunk = imagemDe("zunk");
+const corrida = { rodando: false, raf: 0 };
+[imgEle, imgEla, imgZunk].forEach((im) => { im.onload = () => { if (!corrida.rodando) desenharCorrida(); }; });
+
+const TIPOS = { pneu: { w: 36, h: 14 }, pilha: { w: 30, h: 28 }, zunk: { w: 24, h: 42 }, pedra: { w: 28, h: 20 }, mandacaru: { w: 22, h: 52 }, buraco: { w: 46, h: 8 } };
+function embaralhar(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+function resetCorrida() {
+  Object.assign(corrida, { ult: 0, vel: 170, dist: 0, acai: 0, y: 0, vy: 0, buffer: 0, obst: [], itens: [], textos: [], proxObst: rnd(1, 2), proxItem: rnd(2, 3.5), fase: 0, saco: [], ultimo: null });
+  atualizarHudCorrida();
+}
+const pontosCorrida = () => Math.floor(corrida.dist / 12) + corrida.acai * 10;
+resetCorrida();
+function atualizarHudCorrida() {
+  $("cPontos").textContent = pontosCorrida();
+  $("cAcai").textContent = corrida.acai;
+  $("cRec").textContent = ler("corrida-recorde");
+}
+
+function pularMoto() { if (corrida.rodando) corrida.buffer = 0.12; }
+canvas.addEventListener("pointerdown", (e) => { e.preventDefault(); pularMoto(); });
+document.addEventListener("keydown", (e) => {
+  if (!vistas.corrida.classList.contains("ativa")) return;
+  if (e.code === "Space" || e.code === "ArrowUp") { e.preventDefault(); if (corrida.rodando) pularMoto(); }
+});
+
+function iniciarCorrida() {
+  pararCorrida(false);
+  resetCorrida();
+  $("corridaIntro").hidden = true;
+  $("corridaFim").hidden = true;
+  corrida.rodando = true;
+  corrida.ult = performance.now();
+  corrida.raf = requestAnimationFrame(loopCorrida);
+}
+function pararCorrida(mostrarIntro) {
+  corrida.rodando = false;
+  cancelAnimationFrame(corrida.raf);
+  if (mostrarIntro) {
+    $("corridaIntro").hidden = false;
+    $("corridaFim").hidden = true;
+    resetCorrida();
+    desenharCorrida();
+  }
+}
+function loopCorrida(agora) {
+  if (!corrida.rodando) return;
+  const dt = Math.min(0.05, (agora - corrida.ult) / 1000);
+  corrida.ult = agora;
+  atualizarCorrida(dt);
+  if (corrida.rodando) { desenharCorrida(); corrida.raf = requestAnimationFrame(loopCorrida); }
+}
+
+const bate = (a, b) => a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+
+function atualizarCorrida(dt) {
+  const c = corrida;
+  c.vel = Math.min(340, 170 + c.dist * 0.02);
+  c.dist += c.vel * dt;
+  c.fase += c.vel * dt * 0.08;
+
+  // pulo
+  c.buffer = Math.max(0, c.buffer - dt);
+  if (c.buffer > 0 && c.y === 0) { c.vy = 540; c.buffer = 0; }
+  if (c.y > 0 || c.vy > 0) {
+    c.vy -= 1600 * dt;
+    c.y += c.vy * dt;
+    if (c.y <= 0) { c.y = 0; c.vy = 0; }
+  }
+
+  // obstáculos e açaís
+  c.proxObst -= dt;
+  if (c.proxObst <= 0) {
+    // sorteia de um "saco" embaralhado: variado, sem repetir em sequência e sem ordem pra decorar
+    if (!c.saco.length) c.saco = embaralhar(["pneu", "pilha", "zunk", "pedra", "mandacaru", "buraco", "pneu", "zunk"]);
+    let tipo = c.saco.pop();
+    if (tipo === c.ultimo) { const k = c.saco.findIndex((t) => t !== tipo); if (k >= 0) { const outro = c.saco.splice(k, 1)[0]; c.saco.unshift(tipo); tipo = outro; } }
+    c.ultimo = tipo;
+    const x0 = PISTA.W + 30;
+    c.obst.push({ tipo, x: x0, w: TIPOS[tipo].w, h: TIPOS[tipo].h });
+    if (c.vel > 230 && ["pneu", "pedra", "pilha"].includes(tipo) && Math.random() < 0.25) {   // dupla colada: dá pra pular as duas de uma vez
+      const t2 = sortear(["pneu", "pedra", "pilha"]);
+      c.obst.push({ tipo: t2, x: x0 + TIPOS[tipo].w + rnd(2, 8), w: TIPOS[t2].w, h: TIPOS[t2].h });
+      c.ultimo = t2;
+    }
+    c.proxObst = Math.max(0.85, rnd(0.9, 2.1) * Math.sqrt(170 / c.vel));
+  }
+  c.proxItem -= dt;
+  if (c.proxItem <= 0 && c.obst.some((o) => o.x > PISTA.W - 50)) c.proxItem = 0.5;   // açaí não nasce em cima de obstáculo
+  else if (c.proxItem <= 0) {
+    c.itens.push({ x: PISTA.W + 30, alt: rnd(40, 105), r: 14 });
+    c.proxItem = rnd(2.2, 4);
+  }
+  c.obst.forEach((o) => { o.x -= c.vel * dt; });
+  c.itens.forEach((i) => { i.x -= c.vel * dt; });
+  c.obst = c.obst.filter((o) => o.x > -60);
+  c.itens = c.itens.filter((i) => i.x > -30);
+  c.textos.forEach((t) => { t.vida -= dt; t.y -= 30 * dt; });
+  c.textos = c.textos.filter((t) => t.vida > 0);
+
+  // colisões
+  const eu = { x: PISTA.px - 30, y: PISTA.chao - c.y - 58, w: 46, h: 54 };
+  for (const o of c.obst) {
+    const caixa = { x: o.x + 3, y: PISTA.chao - o.h + 2, w: o.w - 6, h: o.h - 2 };
+    if (bate(eu, caixa)) { fimCorrida(); return; }
+  }
+  c.itens = c.itens.filter((i) => {
+    const caixa = { x: i.x - i.r, y: PISTA.chao - i.alt - i.r, w: i.r * 2, h: i.r * 2 };
+    if (bate(eu, caixa)) {
+      c.acai++;
+      c.textos.push({ x: i.x, y: PISTA.chao - i.alt - 20, vida: 0.8, txt: "+10" });
+      return false;
+    }
+    return true;
+  });
+  atualizarHudCorrida();
+}
+
+function fimCorrida() {
+  corrida.rodando = false;
+  cancelAnimationFrame(corrida.raf);
+  desenharCorrida();
+  const p = pontosCorrida(), rec = ler("corrida-recorde");
+  $("cFimPontos").textContent = p;
+  $("cFimAcai").textContent = corrida.acai + (corrida.acai === 1 ? " açaí pego" : " açaís pegos");
+  if (p > rec) {
+    guardar("corrida-recorde", p);
+    $("cFimRec").textContent = rec > 0 ? "Novo recorde! O anterior era " + rec + "." : "Esse é o seu primeiro recorde!";
+  } else {
+    $("cFimRec").textContent = "Seu recorde: " + rec;
+  }
+  atualizarHudCorrida();
+  atualizarRecordes();
+  $("corridaFim").hidden = false;
+  $("correrDeNovo").focus();
+}
+
+const tri = (t) => Math.abs((((t / Math.PI) % 2) + 2) % 2 - 1);
+function colina(base, amp, esc, off, cor) {          // serra: picos pontudos, não uma colina lisa
+  ctx.beginPath();
+  ctx.moveTo(0, PISTA.H);
+  for (let x = 0; x <= PISTA.W; x += 5) {
+    const t = (x + off) * esc;
+    ctx.lineTo(x, base - amp * (0.55 * tri(t) + 0.3 * tri(t * 2.7 + 1.3) + 0.15 * tri(t * 6.3 + 0.4)));
+  }
+  ctx.lineTo(PISTA.W, PISTA.H);
+  ctx.closePath();
+  ctx.fillStyle = cor;
+  ctx.fill();
+}
+
+// Morro alto do lado do pôr do sol, com a estátua branca do Padre Cícero no topo
+function desenharPadreCicero() {
+  ctx.fillStyle = "#4a2366";
+  ctx.beginPath();
+  [[236, 320], [276, 246], [304, 204], [312, 196], [322, 196], [332, 206], [352, 246], [380, 320]].forEach(([x, y], i) => i ? ctx.lineTo(x, y) : ctx.moveTo(x, y));
+  ctx.closePath(); ctx.fill();
+  ctx.save();
+  ctx.translate(317, 197); ctx.scale(1.3, 1.3);
+  ctx.fillStyle = "#e4dff5"; ctx.fillRect(-8, -7, 16, 7);                                   // pedestal
+  ctx.fillStyle = "#fbf9ff";
+  ctx.beginPath(); ctx.moveTo(-6, -7); ctx.lineTo(-4, -34); ctx.lineTo(4, -34); ctx.lineTo(6, -7); ctx.closePath(); ctx.fill();   // batina
+  ctx.beginPath(); ctx.arc(0, -38, 3.6, 0, Math.PI * 2); ctx.fill();                          // cabeça
+  ctx.beginPath(); ctx.ellipse(0, -41, 7.5, 1.8, 0, 0, Math.PI * 2); ctx.fill();               // aba do chapéu
+  ctx.fillRect(-3.2, -46, 6.4, 5);                                                           // copa
+  ctx.strokeStyle = "#fbf9ff"; ctx.lineWidth = 1.6; ctx.lineCap = "round";
+  ctx.beginPath(); ctx.moveTo(8, -29); ctx.lineTo(9, -7); ctx.stroke();                       // bengala
+  ctx.fillStyle = "rgba(120,110,170,.4)";                                                     // lado de sombra (longe do sol)
+  ctx.beginPath(); ctx.moveTo(0, -34); ctx.lineTo(4, -34); ctx.lineTo(6, -7); ctx.lineTo(0, -7); ctx.closePath(); ctx.fill();
+  ctx.restore();
+}
+
+function desenharPneu(x, alto) {
+  const y = PISTA.chao;
+  ctx.fillStyle = "#15131f";
+  ctx.beginPath(); ctx.ellipse(x + 18, y - 7, 18, 7, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = "#3a3850";
+  ctx.beginPath(); ctx.ellipse(x + 18, y - 8, 9, 3, 0, 0, Math.PI * 2); ctx.fill();
+  if (alto) {
+    ctx.fillStyle = "#15131f";
+    ctx.beginPath(); ctx.ellipse(x + 18, y - 20, 16, 7, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#3a3850";
+    ctx.beginPath(); ctx.ellipse(x + 18, y - 21, 8, 3, 0, 0, Math.PI * 2); ctx.fill();
+  } else {
+    ctx.strokeStyle = "#cfd3e0"; ctx.lineWidth = 2; ctx.lineCap = "round";
+    ctx.beginPath(); ctx.moveTo(x + 26, y - 11); ctx.lineTo(x + 30, y - 22); ctx.stroke();
+    ctx.strokeStyle = "rgba(255,255,255,.55)"; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(x + 32, y - 20); ctx.quadraticCurveTo(x + 38, y - 24, x + 36, y - 30); ctx.stroke();
+  }
+}
+
+function desenharPedra(x) {
+  const y = PISTA.chao;
+  ctx.fillStyle = "#6f6a8a";
+  ctx.beginPath(); ctx.moveTo(x + 1, y); ctx.lineTo(x + 4, y - 13); ctx.lineTo(x + 13, y - 20); ctx.lineTo(x + 24, y - 14); ctx.lineTo(x + 28, y); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = "#8f8aab";
+  ctx.beginPath(); ctx.moveTo(x + 4, y - 13); ctx.lineTo(x + 13, y - 20); ctx.lineTo(x + 15, y - 10); ctx.closePath(); ctx.fill();
+}
+function desenharMandacaru(x) {
+  const y = PISTA.chao;
+  ctx.strokeStyle = "#3f8f4a"; ctx.lineCap = "round"; ctx.lineJoin = "round";
+  ctx.lineWidth = 8; ctx.beginPath(); ctx.moveTo(x + 11, y); ctx.lineTo(x + 11, y - 48); ctx.stroke();
+  ctx.lineWidth = 5;
+  ctx.beginPath(); ctx.moveTo(x + 11, y - 22); ctx.lineTo(x + 3, y - 22); ctx.lineTo(x + 3, y - 36); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(x + 11, y - 16); ctx.lineTo(x + 19, y - 16); ctx.lineTo(x + 19, y - 30); ctx.stroke();
+  ctx.strokeStyle = "#6fbf6f"; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(x + 9, y - 6); ctx.lineTo(x + 9, y - 44); ctx.stroke();
+}
+function desenharBuraco(x) {
+  ctx.fillStyle = "#3a3466"; ctx.beginPath(); ctx.ellipse(x + 23, PISTA.chao - 1, 24, 6, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = "#07060f"; ctx.beginPath(); ctx.ellipse(x + 23, PISTA.chao, 21, 4.5, 0, 0, Math.PI * 2); ctx.fill();
+}
+function desenharAcai(x, y, bob) {
+  y += bob;
+  ctx.fillStyle = "#5b2a86";
+  ctx.beginPath(); ctx.arc(x, y, 13, 0, Math.PI, false); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = "#8a4bbd";
+  ctx.beginPath(); ctx.ellipse(x, y, 13, 5, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = "#f5d06a";
+  [[-6, -1], [0, 1], [5, -1], [8, 1]].forEach(([dx, dy]) => { ctx.beginPath(); ctx.arc(x + dx, y + dy, 1.7, 0, Math.PI * 2); ctx.fill(); });
+  ctx.fillStyle = "#ffe9a8";
+  ctx.beginPath(); ctx.arc(x - 2, y - 3, 3, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = "rgba(255,255,255,.45)"; ctx.lineWidth = 1.5; ctx.lineCap = "round";
+  ctx.beginPath(); ctx.arc(x, y, 9, Math.PI * 0.62, Math.PI * 0.85); ctx.stroke();
+}
+
+function desenharPoncho(cx, y, cor, borda) {
+  ctx.fillStyle = cor;
+  ctx.beginPath(); ctx.moveTo(cx - 13, y); ctx.lineTo(cx + 13, y); ctx.lineTo(cx + 19, y + 13); ctx.lineTo(cx - 19, y + 13); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = borda; ctx.fillRect(cx - 18, y + 9.5, 36, 2.5);
+}
+function desenharMoto(fase, inclina) {
+  ctx.save();
+  ctx.translate(PISTA.px, PISTA.chao - corrida.y);
+  ctx.rotate(inclina);
+  // piloto
+
+  // rodas
+  [[-24, -12], [24, -12]].forEach(([wx, wy]) => {
+    ctx.strokeStyle = "#0d0b1e"; ctx.lineWidth = 5;
+    ctx.beginPath(); ctx.arc(wx, wy, 11, 0, Math.PI * 2); ctx.stroke();
+    ctx.fillStyle = "#4a4766";
+    ctx.beginPath(); ctx.arc(wx, wy, 8, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = "#a9abc0"; ctx.lineWidth = 1.5;
+    for (let k = 0; k < 3; k++) {
+      const a = fase + k * Math.PI / 3;
+      ctx.beginPath(); ctx.moveTo(wx - Math.cos(a) * 8, wy - Math.sin(a) * 8); ctx.lineTo(wx + Math.cos(a) * 8, wy + Math.sin(a) * 8); ctx.stroke();
+    }
+  });
+  // corpo da moto
+  ctx.strokeStyle = "#9aa0b8"; ctx.lineWidth = 3; ctx.lineCap = "round";
+  ctx.beginPath(); ctx.moveTo(24, -12); ctx.lineTo(14, -40); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(-24, -12); ctx.lineTo(-6, -20); ctx.stroke();
+  ctx.fillStyle = "#2f9bb5";
+  ctx.beginPath(); ctx.moveTo(-20, -26); ctx.lineTo(12, -32); ctx.lineTo(18, -20); ctx.lineTo(-6, -13); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = "#217a92";
+  ctx.beginPath(); ctx.ellipse(4, -33, 11, 5, -0.15, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = "#1a1730";
+  ctx.fillRect(-23, -34, 20, 6);
+  ctx.fillStyle = "#7d8199";
+  ctx.fillRect(-32, -22, 14, 4);
+  ctx.strokeStyle = "#111"; ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.moveTo(10, -43); ctx.lineTo(21, -40); ctx.stroke();
+  ctx.fillStyle = "#ffe08a";
+  ctx.beginPath(); ctx.arc(23, -34, 3, 0, Math.PI * 2); ctx.fill();
+  // ela na garupa (poncho vermelho) e ele pilotando (poncho preto): os ponchos caem sobre a moto
+  if (imgEla.complete) ctx.drawImage(imgEla, -46, -78, 42, 56);
+  desenharPoncho(-25, -30, "#d92b45", "#ffd54a");
+  if (imgEle.complete) ctx.drawImage(imgEle, -16, -84, 44, 59);
+  desenharPoncho(6, -33, "#1b1b26", "#c9982a");
+  ctx.restore();
+}
+
+function desenharCorrida() {
+  const c = corrida, W = PISTA.W, H = PISTA.H;
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  // céu
+  const ceu = ctx.createLinearGradient(0, 0, 0, PISTA.estrada);
+  ceu.addColorStop(0, "#2a1a5e"); ceu.addColorStop(0.45, "#a4458f"); ceu.addColorStop(0.78, "#ff7a6b"); ceu.addColorStop(1, "#ffc36b");
+  ctx.fillStyle = ceu; ctx.fillRect(0, 0, W, H);
+  // estrelas
+  ctx.fillStyle = "rgba(255,255,255,.7)";
+  [[30, 30], [90, 60], [150, 22], [210, 48], [300, 30], [330, 78], [60, 100], [270, 96]].forEach(([x, y]) => ctx.fillRect(x, y, 2, 2));
+  // sol
+  const sol = ctx.createRadialGradient(255, 250, 8, 255, 250, 64);
+  sol.addColorStop(0, "#fff2b0"); sol.addColorStop(0.7, "#ffb35c"); sol.addColorStop(1, "rgba(255,150,90,0)");
+  ctx.fillStyle = sol; ctx.beginPath(); ctx.arc(255, 250, 64, 0, Math.PI * 2); ctx.fill();
+  // serra do Horto ao fundo
+  desenharPadreCicero();
+  colina(300, 72, 0.016, c.dist * 0.05, "#5a2c6e");
+  colina(338, 36, 0.03, c.dist * 0.12, "#35194f");
+  // estrada
+  ctx.fillStyle = "#1c1836"; ctx.fillRect(0, PISTA.estrada, W, H - PISTA.estrada);
+  ctx.fillStyle = "#3a3466"; ctx.fillRect(0, PISTA.estrada, W, 3);
+  ctx.fillStyle = "rgba(255,217,138,.7)";
+  const off = c.dist % 56;
+  for (let x = -off; x < W; x += 56) ctx.fillRect(x, 398, 28, 4);
+  // itens
+  c.itens.forEach((i) => desenharAcai(i.x, PISTA.chao - i.alt, Math.sin(c.dist * 0.02 + i.x * 0.05) * 3));
+  // obstáculos
+  c.obst.forEach((o) => {
+    if (o.tipo === "pneu") desenharPneu(o.x, false);
+    else if (o.tipo === "pilha") desenharPneu(o.x, true);
+    else if (o.tipo === "pedra") desenharPedra(o.x);
+    else if (o.tipo === "mandacaru") desenharMandacaru(o.x);
+    else if (o.tipo === "buraco") desenharBuraco(o.x);
+    else if (imgZunk.complete) ctx.drawImage(imgZunk, o.x - 5, PISTA.chao - 50, 34, 46 + 4);
+  });
+  // moto
+  desenharMoto(c.fase, -c.vy * 0.00035);
+  // textos
+  ctx.font = "700 16px Figtree, system-ui, sans-serif";
+  ctx.textAlign = "center";
+  c.textos.forEach((t) => { ctx.globalAlpha = Math.min(1, t.vida * 2); ctx.fillStyle = "#ffd98a"; ctx.fillText(t.txt, t.x, t.y); });
+  ctx.globalAlpha = 1;
+}
+
+$("correr").addEventListener("click", iniciarCorrida);
+$("correrDeNovo").addEventListener("click", iniciarCorrida);
+document.addEventListener("visibilitychange", () => { if (document.hidden && corrida.rodando) pararCorrida(true); });
+desenharCorrida();
+
+/* ============================================================
+   JOGO: ZÉPRIKITO VS MATMALLO
+   ============================================================ */
+const GOLPES = {
+  L: { nome: "Laser de Bigode", icone: "ic-laser", vence: "A" },
+  E: { nome: "Escudo de Gatinho", icone: "ic-escudo", vence: "L" },
+  A: { nome: "Abraço Supremo", icone: "ic-abraco", vence: "E" }
+};
+const GOLPES_M = { L: "Raio de Marshmallow", E: "Muralha Fofinha", A: "Abraço Grudento" };
+// chave = golpe seu + golpe do Matmallo
+const FRASES = {
+  LL: "Os dois raios se cruzaram no meio e viraram confete. Empate!",
+  LE: "O Matmallo levantou a Muralha Fofinha e absorveu o seu laser. Ai!",
+  LA: "O Laser de Bigode chegou antes do Abraço Grudento. Acertou em cheio!",
+  EL: "O Escudo de Gatinho refletiu o raio de volta pro Matmallo!",
+  EE: "Dois escudos fofos, ninguém passa. Empate!",
+  EA: "O Abraço Grudento grudou no escudo e ficou tudo melecado. Ai!",
+  AL: "O Matmallo atirou o raio enquanto você abraçava. Foi mal!",
+  AE: "O Abraço Supremo atravessou a muralha de marshmallow. Irresistível!",
+  AA: "Abraço duplo! Fofo demais pra continuar. Empate!"
+};
+const VIDAS_DUELO = 3;
+const duelo = { hpP: VIDAS_DUELO, hpM: VIDAS_DUELO, ocupado: false };
+
+function desenharVidas() {
+  [["vidaP", duelo.hpP], ["vidaM", duelo.hpM]].forEach(([id, hp]) => {
+    $(id).innerHTML = "";
+    for (let i = 0; i < VIDAS_DUELO; i++) {
+      const c = document.createElement("i");
+      c.textContent = "\u2665";
+      if (i >= hp) c.className = "perdida";
+      $(id).appendChild(c);
+    }
+  });
+}
+function cartaDuelo(id, chave, nome) {
+  $(id).innerHTML = '<svg viewBox="0 0 64 48" aria-hidden="true"><use href="#' + GOLPES[chave].icone + '"/></svg><span>' + nome + "</span>";
+}
+function reiniciarDuelo() {
+  Object.assign(duelo, { hpP: VIDAS_DUELO, hpM: VIDAS_DUELO, ocupado: false });
+  desenharVidas();
+  $("cartaP").innerHTML = '<span class="interrog">?</span>';
+  $("cartaM").innerHTML = '<span class="interrog">?</span>';
+  $("cartaP").classList.remove("ganhou"); $("cartaM").classList.remove("ganhou");
+  $("dueloTexto").textContent = "Escolhe o seu golpe!";
+  $("dueloFim").hidden = true;
+  document.querySelectorAll(".golpe-btn").forEach((b) => { b.disabled = false; });
+}
+function golpear(lutador) {
+  const el = $(lutador);
+  el.classList.remove("golpeado");
+  void el.offsetWidth;
+  el.classList.add("golpeado");
+}
+function jogarGolpe(p) {
+  if (duelo.ocupado) return;
+  duelo.ocupado = true;
+  document.querySelectorAll(".golpe-btn").forEach((b) => { b.disabled = true; });
+  const m = sortear(["L", "E", "A"]);
+  cartaDuelo("cartaP", p, GOLPES[p].nome);
+  cartaDuelo("cartaM", m, GOLPES_M[m]);
+  const res = p === m ? 0 : (GOLPES[p].vence === m ? 1 : -1);
+  $("cartaP").classList.toggle("ganhou", res === 1);
+  $("cartaM").classList.toggle("ganhou", res === -1);
+  $("dueloTexto").textContent = FRASES[p + m];
+  if (res === 1) { duelo.hpM--; golpear("luM"); }
+  if (res === -1) { duelo.hpP--; golpear("luP"); }
+  desenharVidas();
+  if (duelo.hpM <= 0 || duelo.hpP <= 0) {
+    setTimeout(fimDuelo, 1500);
+  } else {
+    setTimeout(() => {
+      duelo.ocupado = false;
+      document.querySelectorAll(".golpe-btn").forEach((b) => { b.disabled = false; });
+    }, 1400);
+  }
+}
+function fimDuelo() {
+  const ganhou = duelo.hpM <= 0;
+  if (ganhou) { guardar("duelo-vitorias", ler("duelo-vitorias") + 1); atualizarRecordes(); }
+  $("duFimTitulo").textContent = ganhou ? "O ZéPrikito venceu!" : "O Matmallo venceu... dessa vez";
+  $("duFimTexto").textContent = ganhou
+    ? "O Matmallo se rendeu com um abraço supremo. Os zunks ficaram sem chefe!"
+    : "Mas o ZéPrikito não desiste. Bora de revanche?";
+  $("dueloFim").hidden = false;
+  $("duelarDeNovo").focus();
+}
+document.querySelectorAll(".golpe-btn").forEach((b) => b.addEventListener("click", () => jogarGolpe(b.dataset.g)));
+$("duelarDeNovo").addEventListener("click", reiniciarDuelo);
+reiniciarDuelo();
+
+/* ============================================================
+   JOGO: CADÊ O ZUNK?
+   ============================================================ */
+const infil = { rodando: false, nivel: 1, achados: 0, tempo: 20, max: 20, trava: false };
+const campo = $("campo");
+
+function espalhar(n, W, H, tam) {
+  const pts = [];
+  let dmin = tam * 0.62, tent = 0;
+  while (pts.length < n) {
+    const x = rnd(tam / 2, W - tam / 2), y = rnd(tam * 0.7, H - tam * 0.5);
+    if (pts.every((p) => Math.hypot(p.x - x, (p.y - y) * 1.15) >= dmin)) pts.push({ x, y });
+    else if (++tent > 60) { dmin *= 0.92; tent = 0; }
+  }
+  return pts;
+}
+
+function novoNivel() {
+  campo.innerHTML = "";
+  infil.trava = false;
+  const W = campo.clientWidth, H = campo.clientHeight;
+  const n = Math.min(70, 12 + infil.nivel * 5);
+  const tam = Math.max(28, Math.min(64, Math.sqrt(W * H * 0.5 / (n * 1.34))));
+  const pts = espalhar(n, W, H, tam).sort((a, b) => a.y - b.y);
+  const alvo = Math.floor(Math.random() * n);
+  const simbolo = infil.nivel >= 4 ? "zunkverde" : "zunkfake";
+  pts.forEach((p, i) => {
+    const el = document.createElement("div");
+    el.className = "pessoa";
+    el.style.width = tam + "px";
+    el.style.left = (p.x - tam / 2) + "px";
+    el.style.top = (p.y - tam * 0.67) + "px";
+    el.style.zIndex = Math.round(p.y);
+    const giro = rnd(-7, 7), espelho = Math.random() < 0.5 ? -1 : 1;
+    el.style.transform = "rotate(" + giro + "deg) scaleX(" + espelho + ")";
+    if (i === alvo) el.dataset.alvo = "1";
+    else el.style.filter = "hue-rotate(" + rnd(-9, 9) + "deg) brightness(" + rnd(0.95, 1.05) + ")";
+    el.innerHTML = SPR(i === alvo ? simbolo : "rimk");
+    campo.appendChild(el);
+  });
+  infil.max = Math.max(9, 20 - (infil.nivel - 1) * 1.1);
+  infil.tempo = infil.max;
+  atualizarInfil();
+}
+
+function atualizarInfil() {
+  $("iNivel").textContent = infil.nivel;
+  $("iAchados").textContent = infil.achados;
+  $("iTempo").textContent = Math.max(0, Math.ceil(infil.tempo));
+  $("iBarra").style.width = Math.max(0, infil.tempo / infil.max * 100) + "%";
+}
+
+let infilAvisoT = null;
+function avisoInfil(txt) {
+  const a = $("iAviso");
+  a.textContent = txt;
+  a.classList.add("visivel");
+  clearTimeout(infilAvisoT);
+  infilAvisoT = setTimeout(() => a.classList.remove("visivel"), 1300);
+}
+
+function iniciarInfil() {
+  pararInfiltrado(false);
+  Object.assign(infil, { rodando: true, nivel: 1, achados: 0 });
+  $("infilIntro").hidden = true;
+  $("infilFim").hidden = true;
+  novoNivel();
+  infil.tick = setInterval(() => {
+    if (infil.trava) return;
+    infil.tempo -= 0.1;
+    atualizarInfil();
+    if (infil.tempo <= 0) fimInfil();
+  }, 100);
+}
+
+function pararInfiltrado(mostrarIntro) {
+  infil.rodando = false;
+  clearInterval(infil.tick);
+  clearTimeout(infil.fimT);
+  if (mostrarIntro) { $("infilIntro").hidden = false; $("infilFim").hidden = true; campo.innerHTML = ""; }
+}
+
+campo.addEventListener("pointerdown", (e) => {
+  if (!infil.rodando || infil.trava) return;
+  const p = e.target.closest(".pessoa");
+  if (!p) return;
+  if (p.dataset.alvo) {
+    infil.trava = true;
+    infil.achados++;
+    infil.nivel++;
+    p.classList.add("achou");
+    avisoInfil("Achou! Próximo nível");
+    atualizarInfil();
+    infil.fimT = setTimeout(novoNivel, 700);
+  } else {
+    infil.tempo = Math.max(0.1, infil.tempo - 2);
+    p.classList.remove("errou");
+    void p.offsetWidth;
+    p.classList.add("errou");
+    const r = campo.getBoundingClientRect();
+    const f = document.createElement("span");
+    f.className = "flutua erro";
+    f.textContent = "-2s";
+    f.style.left = (e.clientX - r.left) + "px";
+    f.style.top = (e.clientY - r.top - 20) + "px";
+    campo.appendChild(f);
+    setTimeout(() => f.remove(), 800);
+    atualizarInfil();
+  }
+});
+
+function fimInfil() {
+  if (!infil.rodando) return;
+  infil.rodando = false;
+  clearInterval(infil.tick);
+  infil.trava = true;
+  const alvo = campo.querySelector("[data-alvo]");
+  if (alvo) alvo.classList.add("revelado");
+  avisoInfil("Ele estava aqui!");
+  infil.fimT = setTimeout(() => {
+    const n = infil.achados, rec = ler("infiltrado-recorde");
+    $("iFimTitulo").textContent = "Acabou o tempo!";
+    $("iFimAchados").textContent = n;
+    $("iFimRank").textContent = n >= 12 ? "Nada escapa de você" : n >= 7 ? "Olho de ZéPrikito" : n >= 3 ? "Detetive rimk" : "Detetive novato";
+    if (n > rec) {
+      guardar("infiltrado-recorde", n);
+      $("iFimRec").textContent = rec > 0 ? "Novo recorde! O anterior era " + rec + "." : "Esse é o seu primeiro recorde!";
+    } else {
+      $("iFimRec").textContent = "Seu recorde: " + rec;
+    }
+    atualizarRecordes();
+    $("infilFim").hidden = false;
+    $("infilDeNovo").focus();
+  }, 1700);
+}
+$("comecarInfil").addEventListener("click", iniciarInfil);
+$("infilDeNovo").addEventListener("click", iniciarInfil);
+
+/* ============================================================
+   PLACAR DO CASAL (sem servidor: cada um manda um código pro outro)
+   ============================================================ */
+const PLACAR_JOGOS = [
+  { id: "zunks",   nome: "Rimks vs Zunks",        un: "pontos",   k: "rimks-zunks-recorde" },
+  { id: "corrida", nome: "Corrida no Horto",      un: "pontos",   k: "corrida-recorde" },
+  { id: "duelo",   nome: "ZéPrikito vs Matmallo", un: "vitórias", k: "duelo-vitorias" },
+  { id: "infil",   nome: "Cadê o zunk?",          un: "rodadas",  k: "infiltrado-recorde" },
+  { id: "flores",  nome: "Jardim",                un: "flores colhidas", k: "jardim-flores" }
+];
+const NOMES = { mat: "Mat", lulu: "Lulu" };
+const lerTexto = (k) => { try { return localStorage.getItem(k) || ""; } catch (e) { return ""; } };
+const guardarTexto = (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} };
+
+function codificar(obj) {
+  const bytes = new TextEncoder().encode(JSON.stringify(obj));
+  let s = ""; bytes.forEach((b) => { s += String.fromCharCode(b); });
+  return "RZ1." + btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+function decodificar(txt) {
+  const m = String(txt).match(/RZ1\.([A-Za-z0-9_-]+)/);
+  if (!m) return null;
+  try {
+    let b = m[1].replace(/-/g, "+").replace(/_/g, "/");
+    while (b.length % 4) b += "=";
+    const bin = atob(b), bytes = Uint8Array.from(bin, (c) => c.charCodeAt(0));
+    const o = JSON.parse(new TextDecoder().decode(bytes));
+    if (o.v !== 1 || !NOMES[o.q] || typeof o.r !== "object" || !o.r) return null;
+    const r = {};
+    PLACAR_JOGOS.forEach((j) => { r[j.id] = Math.max(0, Math.min(1e7, Math.floor(Number(o.r[j.id]) || 0))); });
+    return { v: 1, q: o.q, t: Number(o.t) || Date.now(), r };
+  } catch (e) { return null; }
+}
+function meusRecordes() {
+  const r = {};
+  PLACAR_JOGOS.forEach((j) => { r[j.id] = ler(j.k); });
+  return r;
+}
+const quemSou = () => { const q = lerTexto("placar-quem"); return NOMES[q] ? q : ""; };
+function atrasado(t) {
+  const m = Math.max(0, Math.round((Date.now() - t) / 60000));
+  if (m < 2) return "agora há pouco";
+  if (m < 60) return "há " + m + " minutos";
+  const h = Math.round(m / 60);
+  if (h < 36) return "há " + h + (h === 1 ? " hora" : " horas");
+  const d = Math.round(h / 24);
+  return "há " + d + " dias";
+}
+function importarCodigo(txt) {
+  const o = decodificar(txt);
+  if (!o) return false;
+  guardarTexto("placar-outro", codificar(o));
+  if (!quemSou()) guardarTexto("placar-quem", o.q === "mat" ? "lulu" : "mat");   // se chegou o código do Mat, quem está aqui é a Lulu
+  return true;
+}
+
+function renderPlacar() {
+  const corpo = $("plCorpo"), eu = quemSou();
+  if (!eu) {
+    corpo.innerHTML = '<div class="pl-quem"><h3>Quem está jogando aqui?</h3><p>É só pra saber de quem são os recordes que você vai mandar.</p>' +
+      '<div class="linha"><button class="btn-principal" data-q="mat">Sou o Mat</button><button class="btn-principal" data-q="lulu">Sou a Lulu</button></div></div>';
+    corpo.querySelectorAll("[data-q]").forEach((b) => b.addEventListener("click", () => { guardarTexto("placar-quem", b.dataset.q); renderPlacar(); }));
+    return;
+  }
+  const outro = eu === "mat" ? "lulu" : "mat";
+  const snap = decodificar(lerTexto("placar-outro"));
+  const meus = meusRecordes(), deles = snap && snap.q === outro ? snap.r : null;
+  const col = (q) => q === eu ? { v: meus, tag: "você" } : { v: deles, tag: deles ? "atualizado " + atrasado(snap.t) : "sem código ainda" };
+  const A = col("mat"), B = col("lulu");
+  let linhas = '<div class="pl-l pl-cab"><span></span><b>Mat<small>' + A.tag + '</small></b><b>Lulu<small>' + B.tag + '</small></b></div>';
+  PLACAR_JOGOS.forEach((j) => {
+    const a = A.v ? A.v[j.id] : null, b = B.v ? B.v[j.id] : null;
+    const venceA = a !== null && b !== null && a > b, venceB = a !== null && b !== null && b > a;
+    linhas += '<div class="pl-l"><span>' + j.nome + '<small>' + j.un + '</small></span>' +
+      '<b class="' + (venceA ? "vence" : "") + '">' + (a === null ? "—" : a) + '</b><b class="' + (venceB ? "vence" : "") + '">' + (b === null ? "—" : b) + '</b></div>';
+  });
+  const meuCodigo = codificar({ v: 1, q: eu, t: Date.now(), r: meus });
+  const link = /^https?:/.test(location.protocol) ? "\n" + location.href.split("#")[0] + "#placar=" + meuCodigo : "";
+  const texto = "Meus recordes do fliperama! Cola esse código na tela Placar do casal:\n" + meuCodigo + link;
+  corpo.innerHTML = '<div class="pl-tab">' + linhas + '</div>' +
+    '<p class="pl-ate">A estrela dourada marca quem está na frente.</p>' +
+    '<div class="pl-acao"><h3>Mandar os meus recordes</h3><p>Manda ' + (outro === "mat" ? "pro Mat" : "pra Lulu") + ' o código abaixo. Quando você bater um recorde novo, manda de novo.</p>' +
+    '<div class="pl-botoes"><a class="btn-principal" id="plZap" target="_blank" rel="noopener" href="https://wa.me/?text=' + encodeURIComponent(texto) + '">Mandar no Zap</a>' +
+    '<button class="pl-sec" id="plCopiar" type="button">Copiar código</button></div>' +
+    '<textarea readonly id="plMeu" aria-label="Meu código" rows="3"></textarea></div>' +
+    '<div class="pl-acao"><h3>Ver os recordes ' + (outro === "mat" ? "do Mat" : "da Lulu") + '</h3><p>Cola aqui o código que ' + (outro === "mat" ? "ele" : "ela") + ' te mandou (pode colar a mensagem inteira).</p>' +
+    '<textarea id="plColar" aria-label="Código recebido" rows="3" placeholder="Cola aqui"></textarea>' +
+    '<button class="btn-principal" id="plImportar" type="button">Atualizar placar</button><p class="pl-msg" id="plMsg" role="status"></p></div>' +
+    '<p class="pl-ate"><button class="pl-sec" id="plTroca" type="button" style="padding:7px 14px;font-size:.8rem">Não sou ' + (eu === "mat" ? "o Mat" : "a Lulu") + '</button></p>';
+  $("plMeu").value = texto;
+  $("plCopiar").addEventListener("click", async () => {
+    const ta = $("plMeu");
+    try { await navigator.clipboard.writeText(texto); $("plCopiar").textContent = "Copiado!"; }
+    catch (e) { ta.focus(); ta.select(); $("plCopiar").textContent = "Selecionei, é só copiar"; }
+    setTimeout(() => { const b = $("plCopiar"); if (b) b.textContent = "Copiar código"; }, 2200);
+  });
+  $("plImportar").addEventListener("click", () => {
+    const ok = importarCodigo($("plColar").value);
+    if (ok) { renderPlacar(); $("plMsg").textContent = "Placar atualizado!"; }
+    else $("plMsg").textContent = "Não achei um código válido. Cola a mensagem inteira, começando com RZ1.";
+  });
+  $("plTroca").addEventListener("click", () => { guardarTexto("placar-quem", ""); renderPlacar(); });
+}
+
+(function importarDoLink() {            // se o site foi aberto por um link com #placar=...
+  const m = location.hash.match(/placar=(RZ1\.[A-Za-z0-9_-]+)/);
+  if (m && importarCodigo(m[1])) { try { history.replaceState(null, "", location.pathname + location.search); } catch (e) {} }
+})();
+
+/* ============================================================
+   JARDIM: lírios e girassóis, um dia por dia de verdade
+   ============================================================ */
+const NOME_MOEDA = "Prikitos";
+const MOEDA_SVG = '<svg class="moeda" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10.5" fill="#ffcf3f" stroke="#c9982a" stroke-width="1.5"/><path d="M4.5 14.5 C7.5 10.5 10 12 12 13.2 C14 12 16.5 10.5 19.5 14.5 C17 13.2 14.8 13.8 12 15.5 C9.2 13.8 7 13.2 4.5 14.5Z" fill="#3a2a14"/></svg>';
+const PLANTAS = {
+  girassol: { nome: "Girassol", semente: 12, venda: 30, dias: 3 },
+  lirio:    { nome: "Lírio",    semente: 8,  venda: 20, dias: 2 }
+};
+const PRECO_ADUBO = 30;
+const J_TOT = 25, J_INICIAIS = 9;
+const dist2 = (i) => { const x = i % 5 - 2, y = Math.floor(i / 5) - 2; return x * x + y * y; };
+const J_ORDEM = Array.from({ length: J_TOT }, (_, i) => i).sort((a, b) => dist2(a) - dist2(b) || a - b);
+const ESTAGIOS = ["semente", "broto", "crescendo", "florida"];
+
+const hojeStr = () => { const d = new Date(); return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()); };
+const diaNum = (s) => { const [y, m, d] = s.split("-").map(Number); return Math.round(Date.UTC(y, m - 1, d) / 86400000); };
+
+function jPadrao() {
+  const h = hojeStr(), parc = Array(J_TOT).fill(null);
+  parc[J_ORDEM[0]] = { t: "girassol", e: 1, r: false };
+  parc[J_ORDEM[1]] = { t: "lirio", e: 1, r: false };
+  return { inicio: h, ultimo: h, moedas: 60, livres: J_INICIAIS, parc, adubos: 0, colhidas: { girassol: 0, lirio: 0 }, visto: false };
+}
+function jCarregar() {
+  try {
+    const d = JSON.parse(localStorage.getItem("jardim-estado"));
+    if (d && Array.isArray(d.parc) && d.parc.length === J_TOT && d.inicio && d.ultimo) return d;
+  } catch (e) {}
+  return jPadrao();
+}
+let J = jCarregar();
+function jSalvar() {
+  try { localStorage.setItem("jardim-estado", JSON.stringify(J)); } catch (e) {}
+  guardar("jardim-flores", J.colhidas.girassol + J.colhidas.lirio);
+}
+const jPronta = (p) => !!p && p.e >= PLANTAS[p.t].dias;
+const jLivre = (i) => J_ORDEM.indexOf(i) < J.livres;
+const jPrecoTerreno = () => 25 + (J.livres - J_INICIAIS) * 15;
+
+function jVirarDias() {      // passa os dias de verdade: plantinhas regadas ontem crescem hoje
+  const hoje = hojeStr();
+  const n = Math.min(30, diaNum(hoje) - diaNum(J.ultimo));
+  if (n <= 0) { if (diaNum(hoje) < diaNum(J.ultimo)) J.ultimo = hoje; return null; }
+  let cresceram = 0;
+  J.parc.forEach((p) => { if (p) { if (p.r && !jPronta(p)) { p.e++; cresceram++; } p.r = false; } });
+  J.ultimo = hoje;
+  jSalvar();
+  return { n, cresceram };
+}
+
+/* ---- Desenho das plantas ---- */
+const solo = (r) => '<rect x="2" y="10" width="60" height="52" rx="9" fill="' + (r ? "#5b3a22" : "#8a5a35") + '" stroke="' + (r ? "#3f2615" : "#6a4025") + '" stroke-width="2"/>' +
+  '<path d="M9 26 H55 M9 38 H55 M9 50 H55" stroke="' + (r ? "#4a2e1a" : "#75492a") + '" stroke-width="2.5" stroke-linecap="round" opacity=".7"/>' +
+  (r ? '<circle cx="12" cy="56" r="1.8" fill="#8fd3ff"/><circle cx="52" cy="54" r="1.8" fill="#8fd3ff"/><circle cx="30" cy="58" r="1.5" fill="#8fd3ff"/>' : "");
+function arteGirassol(e) {
+  if (e === 0) return '<ellipse cx="32" cy="44" rx="10" ry="5" fill="#a56d3f"/><ellipse cx="32" cy="41" rx="2.4" ry="3.6" fill="#2b1a0b" transform="rotate(-20 32 41)"/>';
+  if (e === 1) return '<path d="M32 46 V35" stroke="#3f9a3f" stroke-width="3" stroke-linecap="round"/><path d="M32 38 Q22 36 20 28 Q30 28 32 38Z" fill="#58b84f"/><path d="M32 38 Q42 36 44 28 Q34 28 32 38Z" fill="#58b84f"/>';
+  if (e === 2) return '<path d="M32 48 V24" stroke="#3f9a3f" stroke-width="3.5" stroke-linecap="round"/><path d="M32 40 Q19 40 16 30 Q28 29 32 40Z" fill="#58b84f"/><path d="M32 36 Q45 36 48 26 Q36 25 32 36Z" fill="#4aa844"/><circle cx="32" cy="21" r="8" fill="#7cc243"/><path d="M26 16 L29 11 M38 16 L35 11 M32 13 V8" stroke="#ffd23f" stroke-width="3" stroke-linecap="round"/>';
+  let p = "";
+  for (let k = 0; k < 12; k++) p += '<ellipse cx="32" cy="9" rx="4.2" ry="8.5" fill="' + (k % 2 ? "#ffc928" : "#ffd84a") + '" stroke="#e0a000" stroke-width=".8" transform="rotate(' + k * 30 + ' 32 24)"/>';
+  return '<path d="M32 52 V28" stroke="#3f9a3f" stroke-width="4" stroke-linecap="round"/><path d="M32 46 Q18 46 15 35 Q28 34 32 46Z" fill="#58b84f"/><path d="M32 42 Q46 42 49 32 Q36 31 32 42Z" fill="#4aa844"/>' + p +
+    '<circle cx="32" cy="24" r="8.5" fill="#6b3b1a" stroke="#4a2810"/><circle cx="29" cy="22" r="1.2" fill="#a0642b"/><circle cx="34" cy="23" r="1.2" fill="#a0642b"/><circle cx="31" cy="27" r="1.2" fill="#a0642b"/><circle cx="35" cy="27" r="1.2" fill="#a0642b"/><circle cx="28" cy="26" r="1" fill="#a0642b"/>';
+}
+function arteLirio(e) {
+  if (e === 0) return '<ellipse cx="32" cy="44" rx="10" ry="5" fill="#a56d3f"/><path d="M32 35 Q27 41 32 46 Q37 41 32 35Z" fill="#efe2c8" stroke="#c9b48a"/>';
+  if (e === 1) return '<path d="M32 47 Q28 36 22 30 Q33 33 32 47Z" fill="#58b84f"/><path d="M32 47 Q36 34 44 29 Q33 32 32 47Z" fill="#4aa844"/><path d="M32 47 Q31 34 32 26 Q34 36 32 47Z" fill="#6ac85e"/>';
+  let pet = "", est = "";
+  for (let k = 0; k < 6; k++) {
+    pet += '<path d="M32 24 C25 16 27 7 32 3 C37 7 39 16 32 24Z" fill="#fffaf0" stroke="#d6c9e6" stroke-width=".9" transform="rotate(' + k * 60 + ' 32 24)"/>' +
+      '<path d="M32 21 L32 9" stroke="#f4b6c8" stroke-width="1.3" stroke-linecap="round" opacity=".85" transform="rotate(' + k * 60 + ' 32 24)"/>';
+  }
+  [-28, 0, 28].forEach((a) => { est += '<path d="M32 24 L32 14" stroke="#f08a2c" stroke-width="1.4" stroke-linecap="round" transform="rotate(' + a + ' 32 24)"/><circle cx="32" cy="13" r="1.8" fill="#c9650f" transform="rotate(' + a + ' 32 24)"/>'; });
+  return '<path d="M32 54 V28" stroke="#3f9a3f" stroke-width="3.5" stroke-linecap="round"/><path d="M32 48 Q20 48 16 40 Q28 38 32 48Z" fill="#58b84f"/><path d="M32 44 Q44 44 48 36 Q36 34 32 44Z" fill="#4aa844"/>' + pet + est + '<circle cx="32" cy="24" r="2.4" fill="#ffd23f"/>';
+}
+const arte = (t, e) => t === "girassol" ? arteGirassol(e) : arteLirio(e);
+const florSvg = (t) => '<svg viewBox="6 0 52 56" aria-hidden="true">' + arte(t, t === "girassol" ? 3 : 2) + '</svg>';
+
+function jParcelaSvg(i) {
+  if (!jLivre(i)) return '<svg viewBox="0 0 64 64" aria-hidden="true"><rect x="2" y="10" width="60" height="52" rx="9" fill="#3d7f3f" opacity=".75"/><rect x="24" y="30" width="16" height="14" rx="3" fill="#d4cdf0"/><path d="M27 30 V26 a5 5 0 0 1 10 0 V30" fill="none" stroke="#d4cdf0" stroke-width="3"/></svg>';
+  const p = J.parc[i];
+  return '<svg viewBox="0 0 64 64" aria-hidden="true">' + solo(p && p.r) + (p ? '<g class="planta">' + arte(p.t, p.e) + '</g>' : "") + '</svg>';
+}
+
+/* ---- Tela ---- */
+const jEl = { grade: $("jGrade"), dica: $("jDica"), ferr: $("jFerr"), dia: $("jDia"), din: $("jDin") };
+let jFerr = "regar";
+const jBotoes = [];
+for (let i = 0; i < J_TOT; i++) {
+  const b = document.createElement("button");
+  b.type = "button"; b.className = "jd-parc";
+  b.addEventListener("click", () => jToque(i));
+  jEl.grade.appendChild(b); jBotoes.push(b);
+}
+$("jCercaTopo").innerHTML = ["girassol", "lirio", "girassol", "lirio", "girassol", "lirio", "girassol", "lirio", "girassol"].map(florSvg).join("");
+$("jCercaBaixo").innerHTML = ["lirio", "girassol", "lirio", "girassol", "lirio", "girassol", "lirio", "girassol", "lirio"].map(florSvg).join("");
+
+const J_ICONES = {
+  regar: '<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M8 16 H26 V30 Q26 33 23 33 H11 Q8 33 8 30Z" fill="#5aa9e6" stroke="#2f6fa6" stroke-width="1.5"/><path d="M26 20 L35 11 L37 14 L28 24" fill="#5aa9e6" stroke="#2f6fa6" stroke-width="1.5" stroke-linejoin="round"/><path d="M8 20 Q2 20 2 26 Q2 30 8 30" fill="none" stroke="#2f6fa6" stroke-width="2.5"/><circle cx="36" cy="30" r="1.8" fill="#8fd3ff"/><circle cx="32" cy="35" r="1.6" fill="#8fd3ff"/></svg>',
+  colher: '<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M5 18 H35 L31 35 H9Z" fill="#c98a4b" stroke="#8a5a30" stroke-width="1.5" stroke-linejoin="round"/><path d="M9 18 Q20 2 31 18" fill="none" stroke="#8a5a30" stroke-width="2.5"/><path d="M10 24 H30 M12 29 H28" stroke="#8a5a30" stroke-width="1.4"/><circle cx="16" cy="15" r="4" fill="#ffd23f"/><circle cx="25" cy="14" r="4" fill="#fffaf0" stroke="#d6c9e6"/></svg>',
+  girassol: '<svg viewBox="0 0 40 40" aria-hidden="true"><rect x="8" y="4" width="24" height="32" rx="3" fill="#f3e2b8" stroke="#b58a3c" stroke-width="1.5"/><circle cx="20" cy="17" r="8" fill="#ffd23f"/><circle cx="20" cy="17" r="4" fill="#6b3b1a"/><path d="M12 30 H28" stroke="#b58a3c" stroke-width="2"/></svg>',
+  lirio: '<svg viewBox="0 0 40 40" aria-hidden="true"><rect x="8" y="4" width="24" height="32" rx="3" fill="#f3e2b8" stroke="#b58a3c" stroke-width="1.5"/><path d="M20 17 L22 8 L24 17 L31 15 L25 20 L29 27 L22 23 L20 30 L18 23 L11 27 L15 20 L9 15 L16 17 L18 8Z" fill="#fffaf0" stroke="#c9bedd" stroke-width=".8" transform="translate(0,-1) scale(.95) translate(1,1)"/><circle cx="20" cy="18" r="2" fill="#ffb347"/></svg>',
+  adubo: '<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M10 12 Q20 6 30 12 L33 34 Q20 38 7 34Z" fill="#8a6a45" stroke="#5c4428" stroke-width="1.5"/><path d="M12 12 Q20 16 28 12" fill="none" stroke="#5c4428" stroke-width="2"/><path d="M20 22 L22 26 L26 26.5 L23 29.5 L24 33.5 L20 31.5 L16 33.5 L17 29.5 L14 26.5 L18 26Z" fill="#ffd54a"/></svg>'
+};
+function jDesenharFerr() {
+  const itens = [
+    ["regar", "Regar", ""], ["colher", "Colher", ""],
+    ["girassol", "Girassol", MOEDA_SVG + PLANTAS.girassol.semente], ["lirio", "Lírio", MOEDA_SVG + PLANTAS.lirio.semente],
+    ["adubo", "Adubo", "×" + J.adubos]
+  ];
+  jEl.ferr.innerHTML = itens.map(([k, n, extra]) =>
+    '<button class="jd-ferr" type="button" data-j="' + k + '" aria-pressed="' + (jFerr === k) + '">' + J_ICONES[k] + '<span>' + n + '</span>' + (extra ? '<em>' + extra + '</em>' : "") + '</button>').join("") +
+    '<button class="jd-ferr loja" type="button" id="jLoja">Loja</button>';
+  jEl.ferr.querySelectorAll("[data-j]").forEach((b) => b.addEventListener("click", () => { jFerr = b.dataset.j; jDesenharFerr(); jDica(); }));
+  $("jLoja").addEventListener("click", jAbrirLoja);
+}
+
+function jAviso(txt) {
+  const a = $("jAviso");
+  a.textContent = txt; a.classList.add("visivel");
+  clearTimeout(jAviso.t);
+  jAviso.t = setTimeout(() => a.classList.remove("visivel"), 2000);
+}
+function jSacudir() { const c = jEl.din; c.classList.remove("sacudir"); void c.offsetWidth; c.classList.add("sacudir"); }
+function jFlutuar(i, txt, cls) {
+  const f = document.createElement("span");
+  f.className = "flutua " + cls; f.textContent = txt;
+  jBotoes[i].appendChild(f);
+  setTimeout(() => f.remove(), 800);
+}
+
+function jDica() {
+  const crescendo = J.parc.filter((p) => p && !jPronta(p));
+  const sede = crescendo.filter((p) => !p.r).length, prontas = J.parc.filter(jPronta).length;
+  let t;
+  if (prontas) t = prontas + (prontas === 1 ? " planta pronta pra colher!" : " plantas prontas pra colher!");
+  else if (sede) t = "Faltam regar " + sede + (sede === 1 ? " plantinha hoje." : " plantinhas hoje.");
+  else if (crescendo.length) t = "Tudo regado. Amanhã elas crescem!";
+  else t = "Escolhe uma semente e planta num canteiro vazio.";
+  jEl.dica.textContent = t;
+  document.querySelector('.aba[data-vista="jardim"]').classList.toggle("alerta", prontas > 0 || sede > 0);
+}
+
+function renderJardim() {
+  jEl.dia.textContent = diaNum(hojeStr()) - diaNum(J.inicio) + 1;
+  jEl.din.innerHTML = MOEDA_SVG + "<b>" + J.moedas + "</b>";
+  jEl.din.setAttribute("aria-label", J.moedas + " " + NOME_MOEDA);
+  jBotoes.forEach((b, i) => {
+    const p = J.parc[i];
+    b.innerHTML = jParcelaSvg(i) + (!jLivre(i) && J_ORDEM[J.livres] === i ? '<span class="jd-preco">' + MOEDA_SVG + jPrecoTerreno() + '</span>' : "");
+    b.classList.toggle("pronta", jPronta(p));
+    b.setAttribute("aria-label", "Canteiro " + (i + 1) + ": " + (!jLivre(i) ? "bloqueado" : p ? PLANTAS[p.t].nome + ", " + (jPronta(p) ? "pronto pra colher" : ESTAGIOS[p.e] + (p.r ? ", regado" : ", precisa de água")) : "vazio"));
+  });
+  jDesenharFerr(); jDica(); jHora();
+}
+
+function jToque(i) {
+  const b = jBotoes[i], p = J.parc[i];
+  if (!jLivre(i)) { jAbrirLoja(); return; }
+  if (jFerr === "girassol" || jFerr === "lirio") {
+    if (p) { jAviso("Esse canteiro já está ocupado."); return; }
+    const c = PLANTAS[jFerr].semente;
+    if (J.moedas < c) { jAviso("Faltam " + (c - J.moedas) + " " + NOME_MOEDA + "."); jSacudir(); return; }
+    J.moedas -= c; J.parc[i] = { t: jFerr, e: 0, r: false };
+    jSalvar(); renderJardim();
+    jBotoes[i].classList.add("plantou"); setTimeout(() => jBotoes[i].classList.remove("plantou"), 450);
+    jFlutuar(i, "-" + c, "erro");
+    return;
+  }
+  if (!p) { jAviso("Escolhe uma semente pra plantar aqui."); return; }
+  if (jFerr === "regar") {
+    if (jPronta(p)) { jAviso("Já floriu! É só colher."); return; }
+    if (p.r) { jAviso("Essa já foi regada hoje."); return; }
+    p.r = true; jSalvar(); renderJardim();
+    [18, 44, 70].forEach((x, k) => { const g = document.createElement("span"); g.className = "jd-gota"; g.style.left = x + "%"; g.style.animationDelay = k * 90 + "ms"; jBotoes[i].appendChild(g); setTimeout(() => g.remove(), 900); });
+    return;
+  }
+  if (jFerr === "colher") {
+    if (!jPronta(p)) { jAviso("Ainda não floriu. Continua regando!"); return; }
+    const v = PLANTAS[p.t].venda;
+    J.moedas += v; J.colhidas[p.t]++; J.parc[i] = null;
+    jSalvar(); renderJardim();
+    jFlutuar(i, "+" + v, "ok");
+    return;
+  }
+  if (jFerr === "adubo") {
+    if (J.adubos <= 0) { jAbrirLoja(); return; }
+    if (jPronta(p)) { jAviso("Essa já floriu, não precisa de adubo."); return; }
+    p.e++; J.adubos--; jSalvar(); renderJardim();
+    jBotoes[i].classList.add("plantou"); setTimeout(() => jBotoes[i].classList.remove("plantou"), 450);
+    jAviso("Adubo mágico! A plantinha cresceu um dia.");
+  }
+}
+
+/* ---- Loja e boas-vindas ---- */
+function jFolha(titulo, html) {
+  $("jFolhaT").textContent = titulo; $("jFolhaC").innerHTML = html;
+  $("jFundo").hidden = false;
+}
+function jFechar() { $("jFundo").hidden = true; renderJardim(); }
+$("jFundo").addEventListener("click", (e) => { if (e.target === $("jFundo")) jFechar(); });
+document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("jFundo").hidden) jFechar(); });
+
+function jAbrirLoja() {
+  const tem = J.livres < J_TOT, preco = jPrecoTerreno();
+  jFolha("Loja do jardim",
+    '<p>Você tem ' + MOEDA_SVG + ' <b>' + J.moedas + ' ' + NOME_MOEDA + '</b>.</p>' +
+    '<div class="jd-item"><div><b>Adubo mágico</b><span>Faz uma plantinha crescer um dia na hora. Você tem ' + J.adubos + '.</span></div><button type="button" data-c="adubo"' + (J.moedas < PRECO_ADUBO ? " disabled" : "") + '>' + MOEDA_SVG + PRECO_ADUBO + '</button></div>' +
+    (tem ? '<div class="jd-item"><div><b>Terreno novo</b><span>Mais um canteiro pro jardim (' + (J.livres - J_INICIAIS + 1) + ' de ' + (J_TOT - J_INICIAIS) + ').</span></div><button type="button" data-c="terreno"' + (J.moedas < preco ? " disabled" : "") + '>' + MOEDA_SVG + preco + '</button></div>'
+      : '<p>Todos os canteiros já são seus!</p>') +
+    '<button class="fecha" type="button" id="jFechar">Fechar</button>');
+  $("jFechar").addEventListener("click", jFechar);
+  $("jFolhaC").querySelectorAll("[data-c]").forEach((b) => b.addEventListener("click", () => {
+    if (b.dataset.c === "adubo" && J.moedas >= PRECO_ADUBO) { J.moedas -= PRECO_ADUBO; J.adubos++; }
+    else if (b.dataset.c === "terreno" && J.moedas >= jPrecoTerreno() && J.livres < J_TOT) { J.moedas -= jPrecoTerreno(); J.livres++; }
+    else return;
+    jSalvar(); jEl.din.innerHTML = MOEDA_SVG + "<b>" + J.moedas + "</b>"; jAbrirLoja();
+  }));
+}
+
+function jBoasVindas() {
+  J.visto = true; jSalvar();          // só aparece na primeira vez, mesmo se fechar tocando fora
+  jFolha("Bem-vindos ao jardim!",
+    '<p>Um campo de lírios e girassóis só nosso. Cada dia aqui é um dia de verdade: rega as plantinhas hoje e amanhã elas crescem.</p>' +
+    '<p>Quando florescerem, é só colher. Cada flor rende ' + NOME_MOEDA + ', a moeda do jardim, pra comprar sementes, adubo e mais canteiros.</p>' +
+    '<button class="fecha principal" type="button" id="jBora">Bora plantar</button>');
+  $("jBora").addEventListener("click", () => { J.visto = true; jSalvar(); jFechar(); });
+}
+
+/* ---- Hora do dia e virada de dia ---- */
+function jHora() {
+  const h = new Date().getHours(), noite = h >= 19 || h < 6, v = $("vista-jardim");
+  v.classList.remove("hora-dia", "hora-tarde", "hora-noite");
+  v.classList.add(noite ? "hora-noite" : h >= 17 ? "hora-tarde" : "hora-dia");
+  const a = $("jAstro"), t = Math.min(1, Math.max(0, noite ? ((h + 24 - 19) % 24) / 11 : (h - 6) / 11));
+  a.className = "jd-astro " + (noite ? "lua" : "sol");
+  a.style.left = 12 + t * 76 + "%";
+  a.style.top = 54 - Math.sin(t * Math.PI) * 40 + "px";
+}
+function jChecarDia(avisar) {
+  const r = jVirarDias();
+  if (r) {
+    renderJardim();
+    if (avisar) jAviso("Dia " + (diaNum(hojeStr()) - diaNum(J.inicio) + 1) + "! " + (r.cresceram ? r.cresceram + (r.cresceram === 1 ? " plantinha cresceu." : " plantinhas cresceram.") : "Hora de regar de novo."));
+  }
+}
+setInterval(() => { if (!document.hidden) jChecarDia(vistas.jardim.classList.contains("ativa")); else jHora(); }, 30000);
+document.addEventListener("visibilitychange", () => { if (!document.hidden) jChecarDia(vistas.jardim.classList.contains("ativa")); });
+jVirarDias();
+renderJardim();
+
+function jAoAbrir() {               // ao abrir o jardim: confere a virada do dia e mostra as boas-vindas na primeira vez
+  jChecarDia(true); renderJardim();
+  if (!J.visto) jBoasVindas();
+}
+</script>
+</body>
+</html>
